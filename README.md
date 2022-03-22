@@ -12,8 +12,11 @@ Below are the steps/commands to read data from DRAM :
 a) RA (row access): An address in DRAM gets divided into a tuple <Bankid, rowid, colid>. Bankid 
 selects the bank; while the rowid selects a row and all the bit cells in the row are stored in the 
 row buffer. 
+
 b) CA (column access): A column is selected by the colid and the bit corresponding to that column 
 stored in the row buffer is sent out of the bank. 
+
+
 c) PRE (precharge): When all the required columns are read out, the entire row in the row buffer 
 is written back into the original row position of the bank (since the capacitors leak the charge 
 over time which may corrupt the data). 
