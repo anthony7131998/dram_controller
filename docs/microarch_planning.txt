@@ -1,0 +1,68 @@
+
+I/O
+========================
+
+clk (typical clock speed of DRAM chip 150 MHz Clk)
+rst
+o_command ~(7 states/commands ==> 2 bits)
+  ==> Row Access
+  ==> Column Access
+  ==> Precharge
+  ==> Refresh
+  ==> Read
+  ==> Write
+  ==> IDLE
+
+i_rw
+i_en
+i_buf_empty ==> handles col access execution
+i_address (Bankid, rowid, colid) ==> width of address
+i_data
+o_data
+
+o_rw_bank0 ==> Could make a packed array called rw_banks
+o_rw_bank1  ==> 1 read 0 write
+o_rw_bank2
+o_rw_bank3
+o_rw_bank4
+o_rw_bank5
+o_rw_bank6
+o_rw_bank7
+
+o_rw_buff0 ==> Could make a packed array called rw_buffs
+o_rw_buff1
+o_rw_buff2
+o_rw_buff3
+o_rw_buff4
+o_rw_buff5
+o_rw_buff6
+o_rw_buff7
+
+o_busy ==> this tackles constraint D. Though each bank can be accessed simultaneously but at a time only one bank can transfer data to DRAM controller via DRAM bus.
+o_idle ==> indicates when it is in idle/no operation states
+i_ready ==> DRAM ready to take additional commands
+
+o_cs ==> 3 bits wide for the 8 rw_banks
+
+o_row_sel ==> 8 bits wide for the row decoder output
+o_col_sel ==> 128 bits wide for the column decoder output
+o_refresh ==> ?
+
+
+=====================================
+
+
+Refresh rate 125ms
+
+150 MHZ => 7ns
+
+125ms / 7ns = 17857142 count to this number
+
+N = 17857142 (28 bit counter)
+
+
+
+
+
+
+
