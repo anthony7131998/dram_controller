@@ -44,8 +44,8 @@ i_ready ==> DRAM ready to take additional commands
 
 o_cs ==> 3 bits wide for the 8 rw_banks
 
-o_row_sel ==> 8 bits wide for the row decoder output
-o_col_sel ==> 128 bits wide for the column decoder output
+o_col_sel ==> 8 bits wide for the row decoder output
+o_row_sel ==> 128 bits wide for the column decoder output
 o_refresh ==> ?
 
 
