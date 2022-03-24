@@ -1,7 +1,6 @@
-// dram_decoder.v
+// dram_addr_decoder.v
 
-
-module dram_address_translator #(
+module dram_addr_translator #(
     parameter integer ADDR_WIDTH=13,
     parameter integer NUM_OF_BANKS=8,
     parameter integer NUM_OF_ROWS=128,

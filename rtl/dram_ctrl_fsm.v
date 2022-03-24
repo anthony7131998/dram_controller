@@ -19,7 +19,6 @@ module dram_ctrl_fsm #(
 );
 
     // Signal Declarations
-    localparam
 
 
 
