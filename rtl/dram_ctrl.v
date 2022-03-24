@@ -1,9 +1,11 @@
 // dram_ctrl.v
 
 module dram_ctrl #(
-    parameter int L2_REQ_WIDTH=13,
-    parameter int DATA_WIDTH=1,
-    parameter int NUMBER_OF_BANKS=8
+    parameter integer L2_REQ_WIDTH=13,
+    parameter integer DATA_WIDTH=1,
+    parameter integer NUM_OF_BANKS=8,
+    parameter integer NUM_OF_ROWS=128,
+    parameter integer NUM_OF_COLS=8
 ) (
     input clk,
     input rst_b,
@@ -36,21 +38,66 @@ module dram_ctrl #(
     output [DATA_WIDTH-1:0] l2_rsp_data6,
     output [DATA_WIDTH-1:0] l2_rsp_data7,
 
-    output [$clog2(NUMBER_OF_BANKS)-1:0] bank_rw,
-    output [$clog2(NUMBER_OF_BANKS)-1:0] buf_rw,
-    output [$clog2(NUMBER_OF_BANKS)-1:0] cs
+    output [$clog2(NUM_OF_BANKS)-1:0] bank_rw,
+    output [$clog2(NUM_OF_BANKS)-1:0] buf_rw,
+    output [$clog2(NUM_OF_BANKS)-1:0] cs
 );
 
 
 // Internal Signal Declarations and Assignments
+    wire [L2_REQ_WIDTH-1:0] l2_addr_reqs [NUM_OF_BANKS];
+    wire [L2_REQ_WIDTH-1:0] l2_rw_reqs [NUM_OF_BANKS];
 
-// 7 banks => 3 bits
-// 128 rows => 7 bits
-// 8 columns => 3 bits
-// Total Address width => 13 bits
+    wire [$clog2(NUM_OF_BANKS)-1:0] l2_bank_id_reqs [NUM_OF_BANKS];
+    wire [$clog2(NUM_OF_ROWS)-1:0] l2_row_id_reqs [NUM_OF_BANKS];
+    wire [$clog2(NUM_OF_COLS)-1:0] l2_col_id_reqs [NUM_OF_BANKS];
+    
+    assign l2_addr_reqs = { l2_addr_req0, l2_addr_req1, l2_addr_req2, l2_addr_req3,
+                            l2_addr_req4, l2_addr_req5, l2_addr_req6, l2_addr_req7};
 
+    assign l2_rw_reqs = { l2_rw_req0, l2_rw_req1, l2_rw_req2, l2_rw_req3,
+                            l2_rw_req4, l2_rw_req5, l2_rw_req6, l2_rw_req7};
 
 // Instantiations
+    genvar i;
+
+    generate
+        for (i=0; i<NUM_OF_BANKS; i=i+1) begin
+
+            //ToDo: Instantiate L2 request buffers
+            
+            dram_addr_translator #(
+                .ADDR_WIDTH     (L2_REQ_WIDTH),
+                .NUM_OF_BANKS   (NUM_OF_BANKS),
+                .NUM_OF_ROWS    (128),
+                .NUM_OF_COLS    (8)
+            ) addr_trans (
+                .l2_req_address (l2_addr_reqs[i]),
+                .bank_id        (l2_bank_id_reqs[i]),
+                .row_id         (l2_row_id_reqs[i]),
+                .col_id         (l2_col_id_reqs[i])
+            );
+        end
+    endgenerate
+
+
+    dram_decoder3x8 bank_decoder(
+        .en     (),
+        .din    (),
+        .dout   ()
+    );
+
+    dram_decoder3x8 col_decoder(
+        .en     (),
+        .din    (),
+        .dout   ()
+    );
+
+    dram_row_decoder row_decoder (
+        .en     (),
+        .din    (),
+        .dout   ()
+    );
 
 
 
