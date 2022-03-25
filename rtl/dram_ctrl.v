@@ -43,7 +43,6 @@ module dram_ctrl #(
     output [$clog2(NUM_OF_BANKS)-1:0] cs
 );
 
-
 // Internal Signal Declarations and Assignments
     wire [L2_REQ_WIDTH-1:0] l2_addr_reqs [NUM_OF_BANKS];
     wire [L2_REQ_WIDTH-1:0] l2_rw_reqs [NUM_OF_BANKS];
@@ -79,7 +78,6 @@ module dram_ctrl #(
             );
         end
     endgenerate
-
 
     dram_decoder3x8 bank_decoder(
         .en     (),
