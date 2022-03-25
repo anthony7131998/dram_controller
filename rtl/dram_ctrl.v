@@ -1,7 +1,12 @@
 // dram_ctrl.v
 
+// L2_REQ_WIDTH= 13 bits for address, 9 bits for offset
+// Total l2_req_width = 22
+
+// L2_REQ : <address, offset>
+
 module dram_ctrl #(
-    parameter integer L2_REQ_WIDTH=13,
+    parameter integer L2_REQ_WIDTH=22,
     parameter integer DATA_WIDTH=1,
     parameter integer NUM_OF_BANKS=8,
     parameter integer NUM_OF_ROWS=128,
