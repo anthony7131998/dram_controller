@@ -59,30 +59,28 @@ module dram_ctrl_fsm_tb;
         #8 addr_val <= 1'b1;
         bank_id <= $urandom % 8;
         row_id <= $urandom % 128;
-        col_id <= $urandom % 8;
+        col_id <= 0;
         #8;
         @(cmd_req);
 
-        if(dut.present_state != dut.BNR_STATE) begin
-            $display("Error! should be in BnR state  curr_state %0h", dut.present_state);
-            total_errors = total_errors + 1;
-
-        end
-
+        // BNR STATE
         #24 cmd_ack = 1'b1;
         @(!cmd_req);
         #8 cmd_ack = 1'b0;
 
-        if(dut.present_state != dut.COL_STATE) begin
-            $display("Error! should be in Col state  curr_state %0h", dut.present_state);
-            total_errors = total_errors + 1;
-        end
-        #16 cmd_ack = 1'b1;
-        #16 cmd_ack = 1'b0;
+        // COL STATE
+        #24 cmd_ack = 1'b1;
+        @(!cmd_req);
+        #8 cmd_ack = 1'b0;
 
         disable generate_clk;
-
     end
 
+    always @(col_inc) begin : models_decoder_incr
+        col_id <= col_id + 1;
+        if (col_id == 3'b111) begin
+            col_id <= 1'b0;
+        end 
+    end
 
 endmodule

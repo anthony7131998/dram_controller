@@ -83,6 +83,7 @@ module dram_ctrl_fsm #(
         col_inc = 1'b0;
         address_buff_en = 1'b0;
 
+        next_access_count = access_count;
         next_col_counter = col_counter;
         prev_state = present_state;
 
