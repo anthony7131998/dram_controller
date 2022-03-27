@@ -38,9 +38,9 @@ module fifo_dram #(
 			else;
 		end
 		
-		if (rd_addr == 8)
+		if (rd_addr == width)
 			rd_addr = '0;
-		else if (wr_addr == 8)
+		else if (wr_addr == width)
 			wr_addr = '0;
 		
 		assign count = (wr_addr>rd_addr)? (wr_addr-rd_addr):(rd_addr-wr_addr);
