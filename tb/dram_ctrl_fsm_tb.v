@@ -60,27 +60,49 @@ module dram_ctrl_fsm_tb;
         bank_id <= $urandom % 8;
         row_id <= $urandom % 128;
         col_id <= 0;
+        offset <= $urandom % 128;
+        #24;
+
+        @(dut.access_count == offset);
         #8;
-        @(cmd_req);
 
-        // BNR STATE
-        #24 cmd_ack = 1'b1;
-        @(!cmd_req);
-        #8 cmd_ack = 1'b0;
+        #8 refresh_flag <= 1'b1;
 
-        // COL STATE
-        #24 cmd_ack = 1'b1;
-        @(!cmd_req);
-        #8 cmd_ack = 1'b0;
+        @(address_buff_en);
 
         disable generate_clk;
     end
 
-    always @(col_inc) begin : models_decoder_incr
-        col_id <= col_id + 1;
+    always @(posedge clk) begin : models_colid_incr
+        if(col_inc) begin
+            col_id <= col_id + 1;
+        end
+
         if (col_id == 3'b111) begin
-            col_id <= 1'b0;
-        end 
+            col_id <= 3'b0;
+        end
+    end
+
+    always @(posedge clk) begin : models_rowid_incr
+        if(row_inc) begin
+            row_id <= row_id + 1;
+        end
+
+        if (dut.access_count==0) begin
+            row_id <= '0;
+        end
+    end
+
+
+
+    always @(cmd_req) begin : models_handshake
+        if(cmd_req) begin
+            #8 cmd_ack <= 1'b1;
+            #8;
+        end else begin
+            #8 cmd_ack <= 1'b0;
+            #8;
+        end
     end
 
 endmodule

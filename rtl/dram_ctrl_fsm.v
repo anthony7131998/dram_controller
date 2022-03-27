@@ -9,7 +9,6 @@ module dram_ctrl_fsm #(
     input rst_b,
     input addr_val,
     input refresh_flag,
-    input cmd_ack,
     input [$clog2(NUMBER_OF_BANKS)-1:0] bank_id,
     input [$clog2(NUMBER_OF_ROWS)-1:0] row_id,
     input [$clog2(NUMBER_OF_COLS)-1:0] col_id,
@@ -23,7 +22,6 @@ module dram_ctrl_fsm #(
     output reg col_en,
     output reg bank_en,
     output reg address_buff_en,
-    output reg cmd_req,
     output reg [$clog2(NUMBER_OF_BANKS)-1:0] bank_rw,
     output reg [$clog2(NUMBER_OF_BANKS)-1:0] buf_rw
 );
@@ -39,9 +37,8 @@ module dram_ctrl_fsm #(
     reg [$clog2(NUMBER_OF_BANKS)-1:0]  prev_bank_id;
     reg [$clog2(NUMBER_OF_ROWS)-1:0]  prev_row_id;
     reg [3:0] col_counter, next_col_counter;
-    reg [3:0] access_count, next_access_count;
+    reg [9:0] access_count, next_access_count;
 
-    reg next_cmd_req;
 
     wire cond1;
 
@@ -52,11 +49,9 @@ module dram_ctrl_fsm #(
         if (!rst_b) begin
             present_state <= IDLE_STATE;
             col_counter <= '0;
-            access_count <= '0;
-            cmd_req <= 1'b0;
+            access_count <= offset;
         end
         else begin
-            cmd_req <= next_cmd_req;
             present_state <= next_state;
             prev_bank_id <= bank_id;
             prev_row_id <= row_id;
@@ -78,7 +73,6 @@ module dram_ctrl_fsm #(
         row_en = 1'b0;
         col_en = 1'b0;
         bank_en = 1'b0;
-        next_cmd_req = 1'b0;
         row_inc = 1'b0;
         col_inc = 1'b0;
         address_buff_en = 1'b0;
@@ -88,8 +82,7 @@ module dram_ctrl_fsm #(
         prev_state = present_state;
 
         case(present_state)
-            IDLE_STATE:
-            begin
+            IDLE_STATE: begin
                 next_state = IDLE_STATE;
                 if(addr_val) begin
                     next_state = BNR_STATE;
@@ -97,111 +90,65 @@ module dram_ctrl_fsm #(
                 end
             end
 
-            BNR_STATE:
-            begin
-                next_cmd_req = 1'b1;
-                if (refresh_flag == 1'b1) 
-                begin
-                    next_state = REFRESH_STATE;
-                    prev_state = BNR_STATE;
-                end
-                else begin
-                    if (access_count == offset)
-                    begin
-                        next_access_count = '0;
-                        address_buff_en = 1'b1;
-                    end
+            BNR_STATE: begin
+                next_state = COL_STATE;
+                if (access_count == 0) begin
+                    next_access_count = offset;
+                    address_buff_en = 1'b1;
+                end else begin
+                    next_access_count = access_count - 1'b1;
                     cmd = 2'b00;
                     buf_rw = 1'b1;
                     bank_en = 1'b1;
                     row_en = 1'b1;
-                end
-
-                if(cmd_ack) begin
-                    next_cmd_req = 1'b0;
-                    next_state = COL_STATE;
-                end else begin
-                    next_state = BNR_STATE;
-                end
-                
-            end
-
-            COL_STATE:
-            begin
-                next_cmd_req = 1'b1;
-                if (refresh_flag == 1'b1) 
-                begin
-                    next_state = REFRESH_STATE;
-                    prev_state = COL_STATE;
-                end
-                else begin
-                    if (col_counter == 3'b111)  //checking col count to make sure we havent read the row
-                    begin
-                        row_inc = 1'b1;
-                        next_col_counter = '0;
-                        next_access_count = next_access_count + 1'b1;
-                    end
-                    else begin
-                        col_inc = 1'b1;
-                        next_col_counter = next_col_counter + 1'b1;
-                    end
-
-                    cmd = 2'b01;
-                    col_en = 1'b1;
-
-                end
-                if (cmd_ack == 1'b1) 
-                begin
-                    if (cond1)
-                    begin
-                        next_state = PRECHARGE_STATE;
-                    end else begin
-                        next_state = COL_STATE;
-                    end
-                    next_cmd_req = 1'b0;
-                end
-                else begin
-                    next_state = COL_STATE;
+                    row_inc = 1'b1;
                 end
             end
 
-            PRECHARGE_STATE:
-            begin
-                next_cmd_req = 1'b1;
-                if (cmd_ack == 1'b1) 
+            COL_STATE: begin
+                if (col_counter == 3'b111)  //checking col count to make sure we havent read the row
                 begin
-                    next_cmd_req = 1'b0;
-                    if (refresh_flag == 1'b1) 
-                    begin
-                        next_state = REFRESH_STATE;
-                        prev_state = PRECHARGE_STATE;
-                    end
-                    else begin
-                        cmd = 2'b11;
-                        bank_rw = 1;
-                        next_state = BNR_STATE;
-                    end
-                end
-                else begin
+                    row_inc = 1'b1;
+                    next_col_counter = '0;
                     next_state = PRECHARGE_STATE;
                 end
+                else begin
+                    col_inc = 1'b1;
+                    next_col_counter = next_col_counter + 1'b1;
+                end
             end
 
-            REFRESH_STATE:
-            begin
-                next_cmd_req = 1'b1;
-                if (cmd_ack == 1'b1) 
-                begin
-                    next_cmd_req = 1'b0;
-                    cmd = 2'b10;
-                    count_en = 0'b0;
-                    next_state = prev_state;
-                end
-                else begin
-                    next_state = REFRESH_STATE;
-                end
+            PRECHARGE_STATE: begin
+                next_state = BNR_STATE;
+                prev_state = PRECHARGE_STATE;
+                cmd = 2'b11;
+                bank_rw = 1;
             end
+
+            REFRESH_STATE: begin
+                cmd = 2'b10;
+                count_en = 0'b0;
+                next_state = prev_state;
+            end
+
         endcase
+    end
+
+    always @(*) begin
+        if(refresh_flag) begin
+            next_state = REFRESH_STATE;
+            case(present_state)
+                BNR_STATE: begin
+                    prev_state = BNR_STATE;
+                end
+                COL_STATE: begin
+                    prev_state = COL_STATE;
+                end
+                PRECHARGE_STATE: begin
+                    prev_state = PRECHARGE_STATE;
+                end
+            endcase
+        end
     end
 
 endmodule

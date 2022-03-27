@@ -12,7 +12,8 @@ module fifo_dram #(
 		output empty_flag
 	);
 	
-	reg [depth-1:0][width-1:0]buff;
+	integer i;
+	reg [width-1:0] buff [depth-1:0];
 	reg [width-1:0] count;
 	reg [width-1:0] rd_addr; // this will traverse along the width of the buffer
 	reg [width-1:0] wr_addr; // 
@@ -22,26 +23,28 @@ module fifo_dram #(
 	always@(posedge clk)
 	begin
 		if (rst) begin
-			rd_addr = '0;
-			wr_addr = '0;
-			buff = '0;
+			rd_addr <= '0;
+			wr_addr <= '0;
+			for(i=0; i<depth; i=i+1) begin
+				buff[i] <= '0;
+			end
 		end
 		else begin
 			if (wr_en && !full_flag) begin
-				buff [wr_addr] = datain;
-				wr_addr = wr_addr + 1;
+				buff[wr_addr] <= datain;
+				wr_addr <= wr_addr + 1;
 			end
 			else if (rd_en && !empty_flag) begin
-				dataout = buff [rd_addr];
-				rd_addr = rd_addr +1;
+				dataout <= buff[rd_addr];
+				rd_addr <= rd_addr +1;
 			end
 			else;
 		end
 		
 		if (rd_addr == width)
-			rd_addr = '0;
+			rd_addr <= '0;
 		else if (wr_addr == width)
-			wr_addr = '0;
+			wr_addr <= '0;
 		
 		assign count = (wr_addr>rd_addr)? (wr_addr-rd_addr):(rd_addr-wr_addr);
 		

@@ -49,12 +49,12 @@ module dram_ctrl #(
 );
 
 // Internal Signal Declarations and Assignments
-    wire [L2_REQ_WIDTH-1:0] l2_addr_reqs [NUM_OF_BANKS];
-    wire [L2_REQ_WIDTH-1:0] l2_rw_reqs [NUM_OF_BANKS];
+    reg [L2_REQ_WIDTH-1:0] l2_addr_reqs [NUM_OF_BANKS];
+    reg [L2_REQ_WIDTH-1:0] l2_rw_reqs [NUM_OF_BANKS];
 
-    wire [$clog2(NUM_OF_BANKS)-1:0] l2_bank_id_reqs [NUM_OF_BANKS];
-    wire [$clog2(NUM_OF_ROWS)-1:0] l2_row_id_reqs [NUM_OF_BANKS];
-    wire [$clog2(NUM_OF_COLS)-1:0] l2_col_id_reqs [NUM_OF_BANKS];
+    reg [$clog2(NUM_OF_BANKS)-1:0] l2_bank_id_reqs [NUM_OF_BANKS];
+    reg [$clog2(NUM_OF_ROWS)-1:0] l2_row_id_reqs [NUM_OF_BANKS];
+    reg [$clog2(NUM_OF_COLS)-1:0] l2_col_id_reqs [NUM_OF_BANKS];
     
     assign l2_addr_reqs = { l2_addr_req0, l2_addr_req1, l2_addr_req2, l2_addr_req3,
                             l2_addr_req4, l2_addr_req5, l2_addr_req6, l2_addr_req7};
