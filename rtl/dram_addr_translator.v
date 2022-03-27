@@ -10,7 +10,7 @@ module dram_addr_translator #(
     output [$clog2(NUM_OF_BANKS)-1:0] bank_id,
     output [$clog2(NUM_OF_ROWS)-1:0] row_id,
     output [$clog2(NUM_OF_COLS)-1:0] col_id,
-    output [NUM_OF_ROWS-1:0] offset
+    output [$clog2(NUM_OF_ROWS)-1:0] offset
 );
 
     // Bank0: 0-3ff     (0 0000 0000 0000 - 0 0011 1111 1111) 
