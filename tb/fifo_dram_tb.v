@@ -13,7 +13,7 @@ module fifo_tb;
 
  // Instantiate the Unit Under Test (UUT)
 
- fifo_dram uut (
+ dram_buffer uut (
 
                   .clk(clk), 
                   .datain(datain), 

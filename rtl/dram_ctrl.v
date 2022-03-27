@@ -49,6 +49,9 @@ module dram_ctrl #(
 );
 
 // Internal Signal Declarations and Assignments
+
+    reg refresh_flag;
+
     reg [L2_REQ_WIDTH-1:0] l2_addr_reqs [NUM_OF_BANKS];
     reg [L2_REQ_WIDTH-1:0] l2_rw_reqs [NUM_OF_BANKS];
 
@@ -102,7 +105,14 @@ module dram_ctrl #(
         .dout   ()
     );
 
-
+    counter #(
+        .width (36)
+    ) refresh_counter (
+        .clk            (clk),
+        .rst            (rst_b),
+        .en             (),
+        .refresh_flag   (refresh_flag),
+    );
 
 
 endmodule
