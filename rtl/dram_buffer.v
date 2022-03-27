@@ -1,33 +1,32 @@
 module dram_buffer #(
-	parameter width = 8,
-	parameter depth = 8 )
+	parameter WIDTH=8,
+	parameter DEPTH=8)
 	(
-		input [width-1:0] datain,
+		input [WIDTH-1:0] datain,
 		input clk,
 		input rd_en,
 		input wr_en,
-		input rst,
-		output reg [width-1:0] dataout,
+		input rst_b,
+		output reg [WIDTH-1:0] dataout,
 		output full_flag,
 		output empty_flag
 	);
 	
 	integer i;
-	reg [width-1:0] buff [depth-1:0];
-	reg [width-1:0] count;
-	reg [width-1:0] rd_addr; // this will traverse along the width of the buffer
-	reg [width-1:0] wr_addr; //
+	reg [WIDTH-1:0] buff [DEPTH-1:0];
+	reg [WIDTH-1:0] count;
+	reg [WIDTH-1:0] rd_addr; // this will traverse along the width of the buffer
+	reg [WIDTH-1:0] wr_addr; //
 
 	assign empty_flag = (count == 0) ? 1'b1 : 1'b0;
 	assign full_flag =  (count == width) ? 1'b1 : 1'b0;
 	
-	always@(posedge clk)
-	begin
-		if (rst) begin
+	always @(posedge clk or negedge rst_b) begin
+		if (!rst_b) begin
 			rd_addr <= '0;
 			wr_addr <= '0;
 			dataout <= '0;
-			for(i=0; i<depth; i=i+1) begin
+			for(i=0; i<DEPTH; i=i+1) begin
 				buff[i] <= '0;
 			end
 		end
@@ -43,14 +42,14 @@ module dram_buffer #(
 			else;
 		end
 		
-		if (rd_addr == width)
+		if (rd_addr == DEPTH-1)
 			rd_addr <= '0;
-		else if (wr_addr == width)
+		else if (wr_addr == DEPTH-1)
 			wr_addr <= '0;
 		
 		count <= (wr_addr>rd_addr)? (wr_addr-rd_addr):(rd_addr-wr_addr);
 		
 	end
-	endmodule			
+endmodule	
 				
 				
