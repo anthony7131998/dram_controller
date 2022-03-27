@@ -17,7 +17,6 @@ module dram_ctrl #(
     input [DATA_WIDTH-1:0] dram_data_in,
 
     output [1:0] cmd,
-
     output [$clog2(NUM_OF_BANKS)-1:0] bank_rw,
     output [$clog2(NUM_OF_BANKS)-1:0] buf_rw,
     output [$clog2(NUM_OF_BANKS)-1:0] cs
@@ -41,18 +40,17 @@ module dram_ctrl #(
         .empty_flag ()
     );
 
-dram_addr_translator #(
-    parameter integer ADDR_WIDTH=13,
-    parameter integer NUM_OF_BANKS=8,
-    parameter integer NUM_OF_ROWS=128,
-    parameter integer NUM_OF_COLS=8
-) (
-    input [ADDR_WIDTH-1:0] l2_req_address,
-    output [$clog2(NUM_OF_BANKS)-1:0] bank_id,
-    output [$clog2(NUM_OF_ROWS)-1:0] row_id,
-    output [$clog2(NUM_OF_COLS)-1:0] col_id
-);
-
+    dram_addr_translator #(
+        .ADDR_WIDTH     (13),
+        .NUM_OF_BANKS   (8),
+        .NUM_OF_ROWS    (128),
+        .NUM_OF_COLS    (8)
+    ) address_translate (
+        .l2_req_address (),
+        .bank_id        (),
+        .row_id         (),
+        .col_id         ()
+    );
 
     dram_buffer #(
         .width (8),
@@ -84,6 +82,41 @@ dram_addr_translator #(
         .en     (),
         .din    (),
         .dout   ()
+    );
+
+    counter #(
+        .width(36)
+    ) refresh_flag (
+        .clk            (),
+        .rst            (),
+        .en             (),
+        .refresh_flag   ()
+    );
+
+
+    dram_ctrl_fsm #(
+        .NUMBER_OF_BANKS (8),
+        .NUMBER_OF_ROWS (128),
+        .NUMBER_OF_COLS (8)
+    ) dram_fsm (
+        .clk                (),
+        .rst_b              (),
+        .addr_val           (),
+        .refresh_flag       (),
+        .bank_id            (),
+        .row_id             (),
+        .col_id             (),
+        .offset             (),
+        .count_en           (),
+        .row_inc            (),
+        .col_inc            (),
+        .cmd                (),
+        .row_en             (),
+        .col_en             (),
+        .bank_en            (),
+        .address_buff_en    (),
+        .bank_rw            (),
+        .buf_rw             ()
     );
 
 

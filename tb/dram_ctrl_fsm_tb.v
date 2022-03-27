@@ -64,9 +64,10 @@ module dram_ctrl_fsm_tb;
         #24;
 
         @(dut.access_count == offset);
-        #8;
+        #320;
 
         #8 refresh_flag <= 1'b1;
+        #8 refresh_flag <= 1'b0;
 
         @(address_buff_en);
 

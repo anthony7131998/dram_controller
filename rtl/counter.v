@@ -7,6 +7,7 @@ module counter #(
     input en,
     output reg refresh_flag
 );
+
 	reg [width-1:0] count;
 				   
     always @ (posedge clk) begin

@@ -127,8 +127,7 @@ module dram_ctrl_fsm #(
 
             REFRESH_STATE: begin
                 cmd = 2'b10;
-                count_en = 0'b0;
-                next_state = prev_state;
+                count_en = 1'b0;
             end
 
         endcase
