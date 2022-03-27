@@ -60,16 +60,23 @@ module dram_ctrl_fsm_tb;
         bank_id <= $urandom % 8;
         row_id <= $urandom % 128;
         col_id <= 0;
-        offset <= $urandom % 128;
+        offset <= $urandom % (128-row_id);
         #24;
 
         @(dut.access_count == offset);
         #320;
 
         #8 refresh_flag <= 1'b1;
+
+        @(dut.present_state == dut.REFRESH_STATE);
+
         #8 refresh_flag <= 1'b0;
 
         @(address_buff_en);
+
+        for(i=0; i<100; i=i+1) begin
+            #16;
+        end
 
         disable generate_clk;
     end
@@ -94,15 +101,11 @@ module dram_ctrl_fsm_tb;
         end
     end
 
-
-
     always @(cmd_req) begin : models_handshake
         if(cmd_req) begin
             #8 cmd_ack <= 1'b1;
-            #8;
         end else begin
             #8 cmd_ack <= 1'b0;
-            #8;
         end
     end
 

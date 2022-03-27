@@ -24,7 +24,6 @@ module dram_ctrl #(
 
 // Internal Signal Declarations and Assignments
 
-
 // Instantiations
     dram_buffer #(
         .width (8),
@@ -53,7 +52,7 @@ module dram_ctrl #(
     );
 
     dram_buffer #(
-        .width (8),
+        .width (14),
         .depth (1024)
     ) addr_buffer (
         .datain     (),
@@ -93,7 +92,7 @@ module dram_ctrl #(
         .refresh_flag   ()
     );
 
-
+    //ToDo: Connect ack/req
     dram_ctrl_fsm #(
         .NUMBER_OF_BANKS (8),
         .NUMBER_OF_ROWS (128),
