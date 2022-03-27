@@ -9,6 +9,7 @@ module dram_ctrl_fsm #(
     input rst_b,
     input addr_val,
     input refresh_flag,
+    input cmd_ack,
     input [$clog2(NUMBER_OF_BANKS)-1:0] bank_id,
     input [$clog2(NUMBER_OF_ROWS)-1:0] row_id,
     input [$clog2(NUMBER_OF_COLS)-1:0] col_id,
@@ -17,6 +18,7 @@ module dram_ctrl_fsm #(
     output reg count_en,
     output reg row_inc,
     output reg col_inc,
+    output reg cmd_req,
     output reg [1:0] cmd,
     output reg row_en,
     output reg col_en,
@@ -77,21 +79,19 @@ module dram_ctrl_fsm #(
         col_inc = 1'b0;
         address_buff_en = 1'b0;
 
+        next_state = present_state;
         next_access_count = access_count;
         next_col_counter = col_counter;
-        prev_state = present_state;
 
         case(present_state)
             IDLE_STATE: begin
                 next_state = IDLE_STATE;
                 if(addr_val) begin
                     next_state = BNR_STATE;
-                    prev_state = IDLE_STATE;
                 end
             end
 
             BNR_STATE: begin
-                next_state = COL_STATE;
                 if (access_count == 0) begin
                     next_access_count = offset;
                     address_buff_en = 1'b1;
@@ -103,6 +103,13 @@ module dram_ctrl_fsm #(
                     row_en = 1'b1;
                     row_inc = 1'b1;
                 end
+
+                if(refresh_flag) begin
+                    next_state = REFRESH_STATE;
+                end else if(cmd_ack) begin
+                    next_state = COL_STATE;
+                end
+
             end
 
             COL_STATE: begin
@@ -110,7 +117,11 @@ module dram_ctrl_fsm #(
                 begin
                     row_inc = 1'b1;
                     next_col_counter = '0;
-                    next_state = PRECHARGE_STATE;
+                    if(refresh_flag) begin
+                        next_state = REFRESH_STATE;
+                    end else if (cmd_ack) begin
+                        next_state = PRECHARGE_STATE;
+                    end
                 end
                 else begin
                     col_inc = 1'b1;
@@ -119,8 +130,12 @@ module dram_ctrl_fsm #(
             end
 
             PRECHARGE_STATE: begin
-                next_state = BNR_STATE;
-                prev_state = PRECHARGE_STATE;
+                if(refresh_flag) begin
+                    next_state = REFRESH_STATE;
+                end else if(cmd_ack) begin
+                    next_state = BNR_STATE;
+                end
+
                 cmd = 2'b11;
                 bank_rw = 1;
             end
@@ -128,6 +143,9 @@ module dram_ctrl_fsm #(
             REFRESH_STATE: begin
                 cmd = 2'b10;
                 count_en = 1'b0;
+                if(cmd_ack) begin
+                    next_state = prev_state;
+                end
             end
 
         endcase
@@ -135,7 +153,6 @@ module dram_ctrl_fsm #(
 
     always @(*) begin
         if(refresh_flag) begin
-            next_state = REFRESH_STATE;
             case(present_state)
                 BNR_STATE: begin
                     prev_state = BNR_STATE;
@@ -149,6 +166,20 @@ module dram_ctrl_fsm #(
             endcase
         end
     end
+
+    always @(posedge clk or posedge rst_b) begin
+        if(!rst_b) begin
+            cmd_req <= 1'b0;
+        end else if(present_state != IDLE_STATE) begin
+            if(cmd_ack) begin
+                cmd_req <= 1'b0;
+            end else begin
+                cmd_req <= 1'b1;
+            end
+        end
+    end
+
+
 
 endmodule
 
