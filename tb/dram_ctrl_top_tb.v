@@ -3,8 +3,7 @@
 module dram_ctrl_top_tb;
 
     localparam integer L2_REQ_WIDTH=22;
-    localparam integer INPUT_DATA_WIDTH=10;
-    localparam integer OUTPUT_DATA_WIDTH=8;
+    localparam integer DATA_WIDTH=8;
     localparam integer NUM_OF_BANKS=8;
     localparam integer NUM_OF_ROWS=128;
     localparam integer NUM_OF_COLS=8;
@@ -12,21 +11,25 @@ module dram_ctrl_top_tb;
 
     reg clk;
     reg rst_b;
-    reg [1:0] cmd;
-    reg cmd_req;
+    reg l2_rw_req;
     reg cmd_ack;
-    reg [INPUT_DATA_WIDTH-1:0] dram_data_in;
+
+    reg [DATA_WIDTH-1:0] l2_req_data;
     reg [L2_REQ_WIDTH-1:0] l2_req_instr;
-    reg [$clog2(NUM_OF_BANKS)-1:0] bank_rw;
-    reg [$clog2(NUM_OF_BANKS)-1:0] buf_rw;
+    wire [DATA_WIDTH-1:0] dram_data;
+
+    reg cmd_req;
+    reg [1:0] cmd;
     reg [NUM_OF_BANKS-1:0] bank_sel;
     reg [NUM_OF_ROWS-1:0] row_sel;
     reg [NUM_OF_COLS-1:0] col_sel;
+    reg [DATA_WIDTH-1:0] l2_rsp_data;
+    reg [$clog2(NUM_OF_BANKS)-1:0] bank_rw;
+    reg [$clog2(NUM_OF_BANKS)-1:0] buf_rw;
 
     dram_ctrl #(
         .L2_REQ_WIDTH       (22),
-        .INPUT_DATA_WIDTH   (10),
-        .OUTPUT_DATA_WIDTH  (8),
+        .DATA_WIDTH         (8),
         .NUM_OF_BANKS       (8),
         .NUM_OF_ROWS        (128),
         .NUM_OF_COLS        (8),
