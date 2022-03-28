@@ -1,12 +1,11 @@
-module piso #(
+module dram_piso #(
 	parameter WIDTH=8)
 	(
         input clk,
         input rst_b,
         input load,
 		input [WIDTH-1:0] data_in,
-        
-        output reg data_out;
+        output data_out
 	);
 	
     reg [WIDTH-1:0] loaded_value;
@@ -21,7 +20,7 @@ module piso #(
                 loaded_value <= data_in;
             end
             else begin
-                loaded_value <= {1'b0, loaded_value[15:1]}
+                loaded_value <= {1'b0, loaded_value[15:1]};
             end
         end
     end

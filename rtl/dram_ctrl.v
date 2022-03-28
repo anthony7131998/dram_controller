@@ -44,6 +44,7 @@ module dram_ctrl #(
     reg [L2_REQ_WIDTH-1:0] l2_buffer_out;
     reg [CONCAT_ADDRESS-1:0] address_trans_out;
     reg [CONCAT_ADDRESS-1:0] address_buff_out;
+    reg [INPUT_DATA_WIDTH-1:0] data_buffer_out;
     reg [OUTPUT_DATA_WIDTH-1:0] tmp_dram_data;
     reg [$clog2(NUM_OF_BANKS)-1:0] bank_id;
     reg [$clog2(NUM_OF_ROWS)-1:0] row_id;
@@ -82,8 +83,8 @@ module dram_ctrl #(
 
     // Instantiations
     dram_buffer #(
-        .width (8),
-        .depth (1024)
+        .WIDTH (8),
+        .DEPTH (1024)
     ) l2_req_buffer (
         .datain     (l2_req_instr),
         .clk        (clk),
@@ -109,26 +110,33 @@ module dram_ctrl #(
     );
 
     dram_buffer #(
-        .width (14),
-        .depth (1024)
+        .WIDTH (14),
+        .DEPTH (1024)
     ) data_buffer (
         .datain     (dram_data),
         .clk        (clk),
         .rd_en      (addr_buff_en),
         .wr_en      (1'b1),
         .rst        (rst_b),
-        .dataout    (tmp_dram_data),
+        .dataout    (data_buffer_out),
         .full_flag  (nc_full_data_buffer),
         .empty_flag (nc_empty_data_buffer)
     );
 
-    //ToDo: Instantiate PISO buffer
+    dram_piso #(
+        .WIDTH (8)
+    ) piso (
+        .clk        (clk),
+        .rst_b      (rst_b),
+        .load       (addr_buff_en),
+        .data_in    (data_buffer_out), 
+        .data_out   (tmp_dram_data)
+        );
 
-    //
 
     dram_buffer #(
-        .width (14),
-        .depth (1024)
+        .WIDTH (14),
+        .DEPTH (1024)
     ) l2_rsp_buffer (
         .datain     (dram_data),
         .clk        (clk),
