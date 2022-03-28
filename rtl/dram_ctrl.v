@@ -15,35 +15,40 @@ module dram_ctrl #(
 ) (
     input clk,
     input rst_b,
-    input [DATA_WIDTH-1:0] dram_data_in,
+    input l2_rw_req,
+    input cmd_ack,
+
+    input [DATA_WIDTH-1:0] l2_req_data,
     input [L2_REQ_WIDTH-1:0] l2_req_instr,
+    inout [DATA_WIDTH-1:0] dram_data,
 
+    output cmd_req,
     output [1:0] cmd,
-    output [$clog2(NUM_OF_BANKS)-1:0] bank_rw,
-    output [$clog2(NUM_OF_BANKS)-1:0] buf_rw,
-
     output [NUM_OF_BANKS-1:0] bank_sel,
     output [NUM_OF_ROWS-1:0] row_sel,
-    output [NUM_OF_COLS-1:0] col_sel
-
+    output [NUM_OF_COLS-1:0] col_sel,
+    output [DATA_WIDTH-1:0] l2_rsp_data,
+    output [$clog2(NUM_OF_BANKS)-1:0] bank_rw,
+    output [$clog2(NUM_OF_BANKS)-1:0] buf_rw
 );
 
 // Internal Signal Declarations and Assignments
-
-    reg [L2_REQ_WIDTH-1:0] l2_buffer_out;
     reg nc_full_l2_buffer;
     reg nc_empty_l2_buffer;
+    reg nc_empty_data_buffer;
+    reg nc_full_data_buffer;
+    reg nc_empty_rsp_buffer;
+    reg nc_full_rsp_buffer;
 
-    reg nc_empty_addr_buffer;
-    reg nc_full_addr_buffer;
-
+    reg [L2_REQ_WIDTH-1:0] l2_buffer_out;
+    reg [CONCAT_ADDRESS-1:0] address_trans_out;
+    reg [CONCAT_ADDRESS-1:0] address_buff_out;
+    reg [DATA_WIDTH-1:0] tmp_dram_data;
     reg [$clog2(NUM_OF_BANKS)-1:0] bank_id;
     reg [$clog2(NUM_OF_ROWS)-1:0] row_id;
     reg [$clog2(NUM_OF_COLS)-1:0] col_id;
     reg [$clog2(NUM_OF_ROWS)-1:0] offset;
 
-    reg [CONCAT_ADDRESS-1:0] address_trans_out;
-    reg [CONCAT_ADDRESS-1:0] address_buff_out;
 
     reg [NUM_OF_ROWS-1:0] row_offset;
 
@@ -58,13 +63,6 @@ module dram_ctrl #(
     
     reg [$clog2(NUM_OF_ROWS)-1:0] inc_row_id;
     reg [$clog2(NUM_OF_COLS)-1:0] inc_col_id;
-
-
-    //output from address buffer:
-    // assign offset = l2_req_address[ADDR_WIDTH-1:ADDR_WIDTH-7]
-    // assign bank_id = l2_req_address[ADDR_WIDTH-8:ADDR_WIDTH-10];
-    // assign row_id  = l2_req_address[ADDR_WIDTH-11:ADDR_WIDTH-17];
-    // assign col_id  = l2_req_address[ADDR_WIDTH-18:ADDR_WIDTH-20];
     reg [$clog2(NUM_OF_ROWS)-1:0] address_buff_offset;
     reg [$clog2(NUM_OF_BANKS)-1:0] address_buff_bankid;
     reg [$clog2(NUM_OF_ROWS)-1:0] address_buff_rowid;
@@ -80,14 +78,16 @@ module dram_ctrl #(
         inc_row_id = row_inc ? address_buff_rowid + 1'b1 : address_buff_rowid;
     end
 
-// Instantiations
+    assign dram_data = l2_rw_req ? tmp_dram_data : 'bz;
+
+    // Instantiations
     dram_buffer #(
         .width (8),
         .depth (1024)
     ) l2_req_buffer (
         .datain     (l2_req_instr),
         .clk        (clk),
-        .rd_en      (1'b1),
+        .rd_en      (address_buff_en),
         .wr_en      (1'b1),
         .rst        (rst_b),
         .dataout    (l2_buffer_out),
@@ -111,15 +111,29 @@ module dram_ctrl #(
     dram_buffer #(
         .width (14),
         .depth (1024)
-    ) addr_buffer (
-        .datain     (address_trans_out),
+    ) data_buffer (
+        .datain     (dram_data),
+        .clk        (clk),
+        .rd_en      (addr_buff_en),
+        .wr_en      (1'b1),
+        .rst        (rst_b),
+        .dataout    (tmp_dram_data),
+        .full_flag  (nc_full_data_buffer),
+        .empty_flag (nc_empty_data_buffer)
+    );
+
+    dram_buffer #(
+        .width (14),
+        .depth (1024)
+    ) l2_rsp_buffer (
+        .datain     (dram_data),
         .clk        (clk),
         .rd_en      (1'b1),
-        .wr_en      (address_en),
+        .wr_en      (1'b1),
         .rst        (rst_b),
-        .dataout    (address_buff_out),
-        .full_flag  (nc_full_addr_buffer),
-        .empty_flag (nc_empty_addr_buffer)
+        .dataout    (l2_rsp_data),
+        .full_flag  (nc_full_rsp_buffer),
+        .empty_flag (nc_empty_rsp_buffer)
     );
 
     dram_decoder3x8 bank_decoder(
@@ -141,7 +155,7 @@ module dram_ctrl #(
     );
 
     counter #(
-        .width(36)
+        .width  (36)
     ) refresh_counter (
         .clk            (clk),
         .rst            (rst),
@@ -151,9 +165,9 @@ module dram_ctrl #(
 
     //ToDo: Connect ack/req
     dram_ctrl_fsm #(
-        .NUMBER_OF_BANKS (8),
-        .NUMBER_OF_ROWS (128),
-        .NUMBER_OF_COLS (8)
+        .NUMBER_OF_BANKS    (8),
+        .NUMBER_OF_ROWS     (128),
+        .NUMBER_OF_COLS     (8)
     ) dram_fsm (
         .clk                (clk),
         .rst_b              (rst_b),
@@ -163,6 +177,7 @@ module dram_ctrl #(
         .row_id             (address_buff_rowid),
         .col_id             (address_buff_colid),
         .offset             (address_buff_offset),
+        .cmd_req            (cmd_req),
         .count_en           (cnt_en),
         .row_inc            (row_inc), // still needs to be used for incrementer
         .col_inc            (col_inc), // still needs to be used for incrementer
@@ -172,10 +187,8 @@ module dram_ctrl #(
         .bank_en            (bank_en),
         .address_buff_en    (address_en),
         .bank_rw            (bank_rw),
-        .buf_rw             (buf_rw)
+        .buf_rw             (buf_rw),
+        .cmd_ack            (cmd_ack)
     );
-
-
-
 
 endmodule
