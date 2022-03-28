@@ -3,7 +3,6 @@ module dram_sipo #(
 	(
         input clk,
         input rst_b,
-        input load,
         input data_in,
         output [WIDTH-1:0] data_out
 	);
