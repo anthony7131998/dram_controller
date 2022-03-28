@@ -24,7 +24,7 @@ module dram_addr_translator #(
 
 
     // Overall DRAM Address Range: 0-1fff
-    assign offset = l2_req_address[ADDR_WIDTH-1:ADDR_WIDTH-7]
+    assign offset = l2_req_address[ADDR_WIDTH-1:ADDR_WIDTH-7];
     assign bank_id = l2_req_address[ADDR_WIDTH-8:ADDR_WIDTH-10];
     assign row_id  = l2_req_address[ADDR_WIDTH-11:ADDR_WIDTH-17];
     assign col_id  = l2_req_address[ADDR_WIDTH-18:ADDR_WIDTH-20];

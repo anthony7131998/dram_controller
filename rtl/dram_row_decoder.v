@@ -3,7 +3,7 @@
 module dram_row_decoder (
     input en,
     input [6:0] din,
-    output reg [127:0] dout
+    output [127:0] dout
 );
 
     reg [127:0] tmp_dout;

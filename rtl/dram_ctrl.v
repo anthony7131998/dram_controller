@@ -10,27 +10,25 @@ module dram_ctrl #(
     parameter integer DATA_WIDTH=1,
     parameter integer NUM_OF_BANKS=8,
     parameter integer NUM_OF_ROWS=128,
-    parameter integer NUM_OF_COLS=8
-    parameter integer CONCAT_ADDRESS = 20;
+    parameter integer NUM_OF_COLS=8,
+    parameter integer CONCAT_ADDRESS = 20
 ) (
     input clk,
     input rst_b,
     input [DATA_WIDTH-1:0] dram_data_in,
-    input [L2_REQ_WIDTH-1:0] l2_req_instr;
+    input [L2_REQ_WIDTH-1:0] l2_req_instr,
 
     output [1:0] cmd,
     output [$clog2(NUM_OF_BANKS)-1:0] bank_rw,
     output [$clog2(NUM_OF_BANKS)-1:0] buf_rw,
 
-    output [NUM_OF_BANKS-1:0] bank_sel;
-    output [NUM_OF_ROWS-1:0] row_sel;
-    output [NUM_OF_COLS-1:0] col_sel;
+    output [NUM_OF_BANKS-1:0] bank_sel,
+    output [NUM_OF_ROWS-1:0] row_sel,
+    output [NUM_OF_COLS-1:0] col_sel
 
 );
 
 // Internal Signal Declarations and Assignments
-
-   
 
     reg [L2_REQ_WIDTH-1:0] l2_buffer_out;
     reg nc_full_l2_buffer;
@@ -42,11 +40,10 @@ module dram_ctrl #(
     reg [$clog2(NUM_OF_BANKS)-1:0] bank_id;
     reg [$clog2(NUM_OF_ROWS)-1:0] row_id;
     reg [$clog2(NUM_OF_COLS)-1:0] col_id;
+    reg [$clog2(NUM_OF_ROWS)-1:0] offset;
 
     reg [CONCAT_ADDRESS-1:0] address_trans_out;
     reg [CONCAT_ADDRESS-1:0] address_buff_out;
-
-
 
     reg [NUM_OF_ROWS-1:0] row_offset;
 
@@ -56,7 +53,6 @@ module dram_ctrl #(
     reg bank_en;
     reg cnt_en;
     reg refresh_flag;
-
     reg row_inc;
     reg col_inc;
     
@@ -74,22 +70,15 @@ module dram_ctrl #(
     reg [$clog2(NUM_OF_ROWS)-1:0] address_buff_rowid;
     reg [$clog2(NUM_OF_COLS)-1:0] address_buff_colid;
 
-    //need to seperate sections of the address buffer
-    assign address_trans_out = {bank_id, row_id, col_id, offset};
-
-    assign address_buff_offset = address_trans_out[CONCAT_ADDRESS-1:CONCAT_ADDRESS-7];
-    assign address_buff_bankid = address_trans_out[CONCAT_ADDRESS-8:CONCAT_ADDRESS-10];
-    assign address_buff_rowid = address_trans_out[CONCAT_ADDRESS-11:CONCAT_ADDRESS-17]; //this is input to incrementer
-    assign address_buff_colid = address_trans_out[CONCAT_ADDRESS-18:CONCAT_ADDRESS-20]; //this is input to incrementer
-
-
-
-
-   
-
-    assign address_buff_offset;
-
-
+    always @(*) begin
+        address_trans_out = {bank_id, row_id, col_id, offset};
+        address_buff_offset = address_trans_out[CONCAT_ADDRESS-1:CONCAT_ADDRESS-7];
+        address_buff_bankid = address_trans_out[CONCAT_ADDRESS-8:CONCAT_ADDRESS-10];
+        address_buff_rowid = address_trans_out[CONCAT_ADDRESS-11:CONCAT_ADDRESS-17]; //this is input to incrementer
+        address_buff_colid = address_trans_out[CONCAT_ADDRESS-18:CONCAT_ADDRESS-20]; //this is input to incrementer
+        inc_col_id = col_inc ? address_buff_colid + 1'b1 : address_buff_colid;
+        inc_row_id = row_inc ? address_buff_rowid + 1'b1 : address_buff_rowid;
+    end
 
 // Instantiations
     dram_buffer #(
@@ -120,11 +109,7 @@ module dram_ctrl #(
     );
 
     dram_buffer #(
-<<<<<<< HEAD
-        .width (20),
-=======
         .width (14),
->>>>>>> 5c2dd1fbe947e2d3febe2542736a992b996036de
         .depth (1024)
     ) addr_buffer (
         .datain     (address_trans_out),
@@ -157,7 +142,7 @@ module dram_ctrl #(
 
     counter #(
         .width(36)
-    ) refresh_flag (
+    ) refresh_counter (
         .clk            (clk),
         .rst            (rst),
         .en             (cnt_en),

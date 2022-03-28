@@ -19,7 +19,7 @@ module dram_buffer #(
 	reg [WIDTH-1:0] wr_addr; //
 
 	assign empty_flag = (count == 0) ? 1'b1 : 1'b0;
-	assign full_flag =  (count == width) ? 1'b1 : 1'b0;
+	assign full_flag =  (count == WIDTH) ? 1'b1 : 1'b0;
 	
 	always @(posedge clk or negedge rst_b) begin
 		if (!rst_b) begin
