@@ -120,11 +120,7 @@ module dram_ctrl #(
     );
 
     dram_buffer #(
-<<<<<<< HEAD
         .width (20),
-=======
-        .width (14),
->>>>>>> 5c2dd1fbe947e2d3febe2542736a992b996036de
         .depth (1024)
     ) addr_buffer (
         .datain     (address_trans_out),
