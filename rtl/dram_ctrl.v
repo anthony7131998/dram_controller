@@ -7,7 +7,8 @@
 
 module dram_ctrl #(
     parameter integer L2_REQ_WIDTH=22,
-    parameter integer DATA_WIDTH=1,
+    parameter integer INPUT_DATA_WIDTH=10,
+    parameter integer OUTPUT_DATA_WIDTH=8,
     parameter integer NUM_OF_BANKS=8,
     parameter integer NUM_OF_ROWS=128,
     parameter integer NUM_OF_COLS=8,
@@ -18,16 +19,16 @@ module dram_ctrl #(
     input l2_rw_req,
     input cmd_ack,
 
-    input [DATA_WIDTH-1:0] l2_req_data,
+    input [INPUT_DATA_WIDTH-1:0] l2_req_data,
     input [L2_REQ_WIDTH-1:0] l2_req_instr,
-    inout [DATA_WIDTH-1:0] dram_data,
+    inout [OUTPUT_DATA_WIDTH-1:0] dram_data,
 
     output cmd_req,
     output [1:0] cmd,
     output [NUM_OF_BANKS-1:0] bank_sel,
     output [NUM_OF_ROWS-1:0] row_sel,
     output [NUM_OF_COLS-1:0] col_sel,
-    output [DATA_WIDTH-1:0] l2_rsp_data,
+    output [INPUT_DATA_WIDTH-1:0] l2_rsp_data,
     output [$clog2(NUM_OF_BANKS)-1:0] bank_rw,
     output [$clog2(NUM_OF_BANKS)-1:0] buf_rw
 );
@@ -43,12 +44,11 @@ module dram_ctrl #(
     reg [L2_REQ_WIDTH-1:0] l2_buffer_out;
     reg [CONCAT_ADDRESS-1:0] address_trans_out;
     reg [CONCAT_ADDRESS-1:0] address_buff_out;
-    reg [DATA_WIDTH-1:0] tmp_dram_data;
+    reg [OUTPUT_DATA_WIDTH-1:0] tmp_dram_data;
     reg [$clog2(NUM_OF_BANKS)-1:0] bank_id;
     reg [$clog2(NUM_OF_ROWS)-1:0] row_id;
     reg [$clog2(NUM_OF_COLS)-1:0] col_id;
     reg [$clog2(NUM_OF_ROWS)-1:0] offset;
-
 
     reg [NUM_OF_ROWS-1:0] row_offset;
 
@@ -121,6 +121,10 @@ module dram_ctrl #(
         .full_flag  (nc_full_data_buffer),
         .empty_flag (nc_empty_data_buffer)
     );
+
+    //ToDo: Instantiate PISO buffer
+
+    //
 
     dram_buffer #(
         .width (14),
