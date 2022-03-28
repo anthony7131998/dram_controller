@@ -10,7 +10,7 @@ module dram_addr_translator #(
     output [$clog2(NUM_OF_BANKS)-1:0] bank_id,
     output [$clog2(NUM_OF_ROWS)-1:0] row_id,
     output [$clog2(NUM_OF_COLS)-1:0] col_id,
-    output [NUM_OF_ROWS-1:0] offset
+    output [$clog2(NUM_OF_ROWS)-1:0] offset
 );
 
     // Bank0: 0-3ff     (0 0000 0000 0000 - 0 0011 1111 1111) 
@@ -24,7 +24,7 @@ module dram_addr_translator #(
 
 
     // Overall DRAM Address Range: 0-1fff
-    assign offset = l2_req_address[ADDR_WIDTH-1:ADDR_WIDTH-7]
+    assign offset = l2_req_address[ADDR_WIDTH-1:ADDR_WIDTH-7];
     assign bank_id = l2_req_address[ADDR_WIDTH-8:ADDR_WIDTH-10];
     assign row_id  = l2_req_address[ADDR_WIDTH-11:ADDR_WIDTH-17];
     assign col_id  = l2_req_address[ADDR_WIDTH-18:ADDR_WIDTH-20];
