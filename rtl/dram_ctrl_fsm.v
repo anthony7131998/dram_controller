@@ -24,8 +24,8 @@ module dram_ctrl_fsm #(
     output reg col_en,
     output reg bank_en,
     output reg address_buff_en,
-    output reg [$clog2(NUMBER_OF_BANKS)-1:0] bank_rw,
-    output reg [$clog2(NUMBER_OF_BANKS)-1:0] buf_rw
+    output reg bank_rw,
+    output reg buf_rw
 );
 
     // State Declarations

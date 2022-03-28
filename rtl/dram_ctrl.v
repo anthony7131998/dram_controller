@@ -20,7 +20,7 @@ module dram_ctrl #(
 
     input [DATA_WIDTH-1:0] l2_req_data,
     input [L2_REQ_WIDTH-1:0] l2_req_instr,
-    inout [DATA_WIDTH-1:0] dram_data,
+    inout dram_data,
 
     output cmd_req,
     output [1:0] cmd,
@@ -28,8 +28,8 @@ module dram_ctrl #(
     output [NUM_OF_ROWS-1:0] row_sel,
     output [NUM_OF_COLS-1:0] col_sel,
     output [DATA_WIDTH-1:0] l2_rsp_data,
-    output [$clog2(NUM_OF_BANKS)-1:0] bank_rw,
-    output [$clog2(NUM_OF_BANKS)-1:0] buf_rw
+    output bank_rw,
+    output buf_rw
 );
 
 // Internal Signal Declarations and Assignments
@@ -46,6 +46,7 @@ module dram_ctrl #(
     wire [$clog2(NUM_OF_ROWS)-1:0] offset;
     wire [$clog2(NUM_OF_ROWS)-1:0] row_offset;
     wire [DATA_WIDTH-1:0] data_buffer_out;
+    wire [DATA_WIDTH-1:0] sipo_data_out;
     wire tmp_dram_bit_data;
 
     wire address_en;
@@ -122,7 +123,7 @@ module dram_ctrl #(
 
     dram_piso #(
         .WIDTH (8)
-    ) piso (
+    ) dram_piso (
         .clk        (clk),
         .rst_b      (rst_b),
         .load       (addr_buff_en),
@@ -130,12 +131,20 @@ module dram_ctrl #(
         .data_out   (tmp_dram_bit_data)
     );
 
+    dram_sipo #(
+	    .WIDTH (8)
+    ) dram_sipo(
+        .clk      (clk), 
+        .rst_b    (rst_b),
+        .data_in  (dram_data),
+        .data_out (sipo_data_out)
+	);
 
     dram_buffer #(
         .WIDTH (8),
         .DEPTH (1024)
     ) l2_rsp_buffer (
-        .datain     (dram_data),
+        .datain     (sipo_data_out),
         .clk        (clk),
         .rd_en      (1'b1),
         .wr_en      (1'b1),
