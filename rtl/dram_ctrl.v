@@ -7,8 +7,7 @@
 
 module dram_ctrl #(
     parameter integer L2_REQ_WIDTH=22,
-    parameter integer INPUT_DATA_WIDTH=10,
-    parameter integer OUTPUT_DATA_WIDTH=8,
+    parameter integer DATA_WIDTH=8,
     parameter integer NUM_OF_BANKS=8,
     parameter integer NUM_OF_ROWS=128,
     parameter integer NUM_OF_COLS=8,
@@ -19,49 +18,47 @@ module dram_ctrl #(
     input l2_rw_req,
     input cmd_ack,
 
-    input [INPUT_DATA_WIDTH-1:0] l2_req_data,
+    input [DATA_WIDTH-1:0] l2_req_data,
     input [L2_REQ_WIDTH-1:0] l2_req_instr,
-    inout [OUTPUT_DATA_WIDTH-1:0] dram_data,
+    inout [DATA_WIDTH-1:0] dram_data,
 
     output cmd_req,
     output [1:0] cmd,
     output [NUM_OF_BANKS-1:0] bank_sel,
     output [NUM_OF_ROWS-1:0] row_sel,
     output [NUM_OF_COLS-1:0] col_sel,
-    output [INPUT_DATA_WIDTH-1:0] l2_rsp_data,
+    output [DATA_WIDTH-1:0] l2_rsp_data,
     output [$clog2(NUM_OF_BANKS)-1:0] bank_rw,
     output [$clog2(NUM_OF_BANKS)-1:0] buf_rw
 );
 
 // Internal Signal Declarations and Assignments
-    reg nc_full_l2_buffer;
-    reg nc_empty_l2_buffer;
-    reg nc_empty_data_buffer;
-    reg nc_full_data_buffer;
-    reg nc_empty_rsp_buffer;
-    reg nc_full_rsp_buffer;
+    wire nc_full_l2_buffer;
+    wire nc_empty_l2_buffer;
+    wire nc_empty_data_buffer;
+    wire nc_full_data_buffer;
+    wire nc_empty_rsp_buffer;
+    wire nc_full_rsp_buffer;
+    wire [L2_REQ_WIDTH-1:0] l2_buffer_out;
+    wire [$clog2(NUM_OF_BANKS)-1:0] bank_id;
+    wire [$clog2(NUM_OF_ROWS)-1:0] row_id;
+    wire [$clog2(NUM_OF_COLS)-1:0] col_id;
+    wire [$clog2(NUM_OF_ROWS)-1:0] offset;
+    wire [$clog2(NUM_OF_ROWS)-1:0] row_offset;
+    wire [DATA_WIDTH-1:0] data_buffer_out;
+    wire tmp_dram_bit_data;
 
-    reg [L2_REQ_WIDTH-1:0] l2_buffer_out;
+    wire address_en;
+    wire row_en;
+    wire col_en;
+    wire bank_en;
+    wire cnt_en;
+    wire refresh_flag;
+    wire row_inc;
+    wire col_inc;
+
     reg [CONCAT_ADDRESS-1:0] address_trans_out;
     reg [CONCAT_ADDRESS-1:0] address_buff_out;
-    reg [INPUT_DATA_WIDTH-1:0] data_buffer_out;
-    reg [OUTPUT_DATA_WIDTH-1:0] tmp_dram_data;
-    reg [$clog2(NUM_OF_BANKS)-1:0] bank_id;
-    reg [$clog2(NUM_OF_ROWS)-1:0] row_id;
-    reg [$clog2(NUM_OF_COLS)-1:0] col_id;
-    reg [$clog2(NUM_OF_ROWS)-1:0] offset;
-
-    reg [NUM_OF_ROWS-1:0] row_offset;
-
-    reg address_en;
-    reg row_en;
-    reg col_en;
-    reg bank_en;
-    reg cnt_en;
-    reg refresh_flag;
-    reg row_inc;
-    reg col_inc;
-    
     reg [$clog2(NUM_OF_ROWS)-1:0] inc_row_id;
     reg [$clog2(NUM_OF_COLS)-1:0] inc_col_id;
     reg [$clog2(NUM_OF_ROWS)-1:0] address_buff_offset;
@@ -79,25 +76,25 @@ module dram_ctrl #(
         inc_row_id = row_inc ? address_buff_rowid + 1'b1 : address_buff_rowid;
     end
 
-    assign dram_data = l2_rw_req ? tmp_dram_data : 'bz;
+    assign dram_data = l2_rw_req ? tmp_dram_bit_data : 'bz;
 
     // Instantiations
     dram_buffer #(
-        .WIDTH (8),
+        .WIDTH (22),
         .DEPTH (1024)
     ) l2_req_buffer (
         .datain     (l2_req_instr),
         .clk        (clk),
         .rd_en      (address_buff_en),
         .wr_en      (1'b1),
-        .rst        (rst_b),
+        .rst_b      (rst_b),
         .dataout    (l2_buffer_out),
         .full_flag  (nc_full_l2_buffer),
         .empty_flag (nc_empty_l2_buffer)
     );
 
     dram_addr_translator #(
-        .ADDR_WIDTH     (20),
+        .ADDR_WIDTH     (22),
         .NUM_OF_BANKS   (8),
         .NUM_OF_ROWS    (128),
         .NUM_OF_COLS    (8)
@@ -110,14 +107,14 @@ module dram_ctrl #(
     );
 
     dram_buffer #(
-        .WIDTH (14),
+        .WIDTH (8),
         .DEPTH (1024)
     ) data_buffer (
-        .datain     (dram_data),
+        .datain     (l2_req_data),
         .clk        (clk),
         .rd_en      (addr_buff_en),
         .wr_en      (1'b1),
-        .rst        (rst_b),
+        .rst_b      (rst_b),
         .dataout    (data_buffer_out),
         .full_flag  (nc_full_data_buffer),
         .empty_flag (nc_empty_data_buffer)
@@ -130,19 +127,19 @@ module dram_ctrl #(
         .rst_b      (rst_b),
         .load       (addr_buff_en),
         .data_in    (data_buffer_out), 
-        .data_out   (tmp_dram_data)
-        );
+        .data_out   (tmp_dram_bit_data)
+    );
 
 
     dram_buffer #(
-        .WIDTH (14),
+        .WIDTH (8),
         .DEPTH (1024)
     ) l2_rsp_buffer (
         .datain     (dram_data),
         .clk        (clk),
         .rd_en      (1'b1),
         .wr_en      (1'b1),
-        .rst        (rst_b),
+        .rst_b      (rst_b),
         .dataout    (l2_rsp_data),
         .full_flag  (nc_full_rsp_buffer),
         .empty_flag (nc_empty_rsp_buffer)

@@ -13,7 +13,7 @@ module dram_ctrl_fsm #(
     input [$clog2(NUMBER_OF_BANKS)-1:0] bank_id,
     input [$clog2(NUMBER_OF_ROWS)-1:0] row_id,
     input [$clog2(NUMBER_OF_COLS)-1:0] col_id,
-    input [9:0] offset,
+    input [$clog2(NUMBER_OF_ROWS)-1:0] offset,
 
     output reg count_en,
     output reg row_inc,
