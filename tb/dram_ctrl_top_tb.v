@@ -3,7 +3,8 @@
 module dram_ctrl_top_tb;
 
     integer total_errors = 0;
-    localparam integer L2_REQ_WIDTH=22;
+    localparam integer NUM_OF_TESTS = 128;
+    localparam integer L2_REQ_WIDTH=20;
     localparam integer DATA_WIDTH=8;
     localparam integer NUM_OF_BANKS=8;
     localparam integer NUM_OF_ROWS=128;
@@ -29,7 +30,7 @@ module dram_ctrl_top_tb;
     reg buf_rw;
 
     dram_ctrl #(
-        .L2_REQ_WIDTH       (22),
+        .L2_REQ_WIDTH       (20),
         .DATA_WIDTH         (8),
         .NUM_OF_BANKS       (8),
         .NUM_OF_ROWS        (128),
@@ -60,6 +61,7 @@ module dram_ctrl_top_tb;
 
     initial begin : drive_signals
         integer i;
+        integer j;
         #10 rst_b <= 1'b0;
         #10 rst_b <= 1'b1;
 
@@ -72,14 +74,15 @@ module dram_ctrl_top_tb;
             #5 l2_req_data <= $urandom;
         end
 
+
+        @(dut.dram_fsm.access_count == 0);
+
+
         #10 l2_rw_req <= 1'b0; // read from DRAM
-        for(i=0; i<64; i=i+1) begin
+        for(i=0; i<128; i=i+1) begin
             #5 l2_req_instr <= l2_req_instr - 1'b1;
         end
 
-        for (i=0; i<10; i=i+1) begin
-            #10;
-        end 
 
         disable generate_clk;
     end
@@ -100,7 +103,6 @@ module dram_ctrl_top_tb;
                     dut.address_translate.bank_id, dut.address_translate.row_id, dut.address_translate.col_id, dut.address_translate.offset);
     end
 
-
     always @(cmd_req) begin : models_handshake
         if(cmd_req) begin
             #8 cmd_ack <= 1'b1;
@@ -108,6 +110,5 @@ module dram_ctrl_top_tb;
             #8 cmd_ack <= 1'b0;
         end
     end
-
 
 endmodule

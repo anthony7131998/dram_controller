@@ -147,6 +147,7 @@ module dram_ctrl_fsm #(
     end
 
     always @(*) begin
+        prev_state = present_state;
         if(refresh_flag) begin
             case(present_state)
                 BNR_STATE: begin
@@ -162,7 +163,7 @@ module dram_ctrl_fsm #(
         end
     end
 
-    always @(posedge clk or posedge rst_b) begin
+    always @(posedge clk or negedge rst_b) begin
         if(!rst_b) begin
             cmd_req <= 1'b0;
         end else if(present_state != IDLE_STATE) begin

@@ -3,18 +3,16 @@
 module dram_row_decoder (
     input en,
     input [6:0] din,
-    output [127:0] dout
+    output reg [127:0] dout
 );
 
     reg [127:0] tmp_dout;
 
-    assign dout = tmp_dout;
-
     always @(*) begin
-        tmp_dout <= 128'h0;
+        dout <= 128'h0;
         if(en) begin
-            tmp_dout <= 128'h1;
-            tmp_dout <= tmp_dout << din;
+            tmp_dout = 128'h1;
+            dout = tmp_dout << din;
         end
     end
 
