@@ -41,11 +41,6 @@ module dram_ctrl_fsm #(
     reg [3:0] col_counter, next_col_counter;
     reg [9:0] access_count, next_access_count;
 
-
-    wire cond1;
-
-    assign cond1 = (prev_row_id != row_id) || (prev_bank_id != bank_id);
-
     always @(posedge clk, posedge rst_b) 
     begin 
         if (!rst_b) begin
