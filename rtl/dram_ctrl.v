@@ -83,7 +83,7 @@ module dram_ctrl #(
     // Instantiations
     dram_buffer #(
         .WIDTH (22),
-        .DEPTH (64)
+        .DEPTH (NUM_OF_ROWS)
     ) l2_req_buffer (
         .datain     (l2_req_instr),
         .clk        (clk),
@@ -110,7 +110,7 @@ module dram_ctrl #(
 
     dram_buffer #(
         .WIDTH (8),
-        .DEPTH (64)
+        .DEPTH (NUM_OF_ROWS)
     ) data_buffer (
         .datain     (l2_req_data),
         .clk        (clk),
@@ -143,7 +143,7 @@ module dram_ctrl #(
 
     dram_buffer #(
         .WIDTH (8),
-        .DEPTH (64)
+        .DEPTH (NUM_OF_ROWS)
     ) l2_rsp_buffer (
         .datain     (sipo_data_out),
         .clk        (clk),
@@ -177,7 +177,7 @@ module dram_ctrl #(
         .width  (36)
     ) refresh_counter (
         .clk            (clk),
-        .rst            (rst),
+        .rst_b          (rst_b),
         .en             (cnt_en),
         .refresh_flag   (refresh_flag)
     );
