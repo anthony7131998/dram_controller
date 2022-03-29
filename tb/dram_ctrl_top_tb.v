@@ -3,6 +3,7 @@
 module dram_ctrl_top_tb;
 
     integer total_errors = 0;
+    localparam integer NUM_OF_TESTS = 128;
     localparam integer L2_REQ_WIDTH=22;
     localparam integer DATA_WIDTH=8;
     localparam integer NUM_OF_BANKS=8;
@@ -60,6 +61,7 @@ module dram_ctrl_top_tb;
 
     initial begin : drive_signals
         integer i;
+        integer j;
         #10 rst_b <= 1'b0;
         #10 rst_b <= 1'b1;
 
@@ -72,10 +74,18 @@ module dram_ctrl_top_tb;
             #5 l2_req_data <= $urandom;
         end
 
+
+        // Fills up L2 Req Buffer
+        for (j=0; j<NUM_OF_TESTS; j=j+1) begin
+            // Writes to DRAM BFM for 1 instruction
+            @(dut.dram_fsm.access_count == 0);
+        end
+
         #10 l2_rw_req <= 1'b0; // read from DRAM
-        for(i=0; i<64; i=i+1) begin
+        for(i=0; i<128; i=i+1) begin
             #5 l2_req_instr <= l2_req_instr - 1'b1;
         end
+
 
         disable generate_clk;
     end
