@@ -65,16 +65,21 @@ module dram_ctrl_top_tb;
 
         l2_rw_req <= 1'b1; // write to DRAM
         
-        for(i=0; i<10; i=i+1) begin
-            #10 l2_req_instr <= $urandom;
-            #10 l2_req_data <= $urandom;
+        for(i=0; i<64; i=i+1) begin
+            #5 l2_req_instr <= $urandom;
+            #5 l2_req_data <= $urandom;
         end
+
+        for (i=0; i<64; i=i+1) begin
+            #10;
+        end 
 
         disable generate_clk;
     end
 
     initial begin : monitor_buffers
-        $monitor("[$monitor] time=%0t addr_buffer_in=%0h addr_buffer_out=%0h", $time, dut.l2_req_instr, dut.l2_buffer_out);
+        $monitor("[$monitor] time=%0t rd_en=%0h, wr_en=%0h, addr_buffer_in=%0h, addr_buffer_out=%0h", 
+                    $time, dut.l2_req_buffer.rd_en, dut.l2_req_buffer.wr_en, dut.l2_req_instr, dut.l2_buffer_out);
     end
 
     always @(cmd_req) begin : models_handshake

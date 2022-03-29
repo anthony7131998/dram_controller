@@ -49,6 +49,7 @@ module dram_ctrl #(
     wire [DATA_WIDTH-1:0] sipo_data_out;
     wire tmp_dram_bit_data;
 
+    wire addr_val;
     wire address_en;
     wire row_en;
     wire col_en;
@@ -82,7 +83,7 @@ module dram_ctrl #(
     // Instantiations
     dram_buffer #(
         .WIDTH (22),
-        .DEPTH (1024)
+        .DEPTH (64)
     ) l2_req_buffer (
         .datain     (l2_req_instr),
         .clk        (clk),
@@ -90,7 +91,7 @@ module dram_ctrl #(
         .wr_en      (1'b1),
         .rst_b      (rst_b),
         .dataout    (l2_buffer_out),
-        .full_flag  (nc_full_l2_buffer),
+        .full_flag  (addr_val),
         .empty_flag (nc_empty_l2_buffer)
     );
 
@@ -109,7 +110,7 @@ module dram_ctrl #(
 
     dram_buffer #(
         .WIDTH (8),
-        .DEPTH (1024)
+        .DEPTH (64)
     ) data_buffer (
         .datain     (l2_req_data),
         .clk        (clk),
@@ -142,7 +143,7 @@ module dram_ctrl #(
 
     dram_buffer #(
         .WIDTH (8),
-        .DEPTH (1024)
+        .DEPTH (64)
     ) l2_rsp_buffer (
         .datain     (sipo_data_out),
         .clk        (clk),
@@ -189,7 +190,7 @@ module dram_ctrl #(
     ) dram_fsm (
         .clk                (clk),
         .rst_b              (rst_b),
-        .addr_val           (1'b1),
+        .addr_val           (addr_val),
         .refresh_flag       (refresh_flag),
         .bank_id            (address_buff_bankid),
         .row_id             (address_buff_rowid),

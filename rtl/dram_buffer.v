@@ -19,13 +19,14 @@ module dram_buffer #(
 	reg [WIDTH-1:0] wr_addr; //
 
 	assign empty_flag = (count == 0) ? 1'b1 : 1'b0;
-	assign full_flag =  (count == WIDTH) ? 1'b1 : 1'b0;
+	assign full_flag =  (count == DEPTH-1) ? 1'b1 : 1'b0;
 	
 	always @(posedge clk or negedge rst_b) begin
 		if (!rst_b) begin
 			rd_addr <= '0;
 			wr_addr <= '0;
 			dataout <= '0;
+			count <= '0;
 			for(i=0; i<DEPTH; i=i+1) begin
 				buff[i] <= '0;
 			end
@@ -34,20 +35,21 @@ module dram_buffer #(
 			if (wr_en && !full_flag) begin
 				buff[wr_addr] <= datain;
 				wr_addr <= wr_addr + 1;
+				count <= count + 1'b1;
 			end
 			else if (rd_en && !empty_flag) begin
 				dataout <= buff[rd_addr];
-				rd_addr <= rd_addr +1;
+				rd_addr <= rd_addr + 1;
+				count <= count - 1'b1;
 			end
 			else;
 		end
 		
 		if (rd_addr == DEPTH-1)
-			rd_addr <= '0;
+			rd_addr <= 0;
 		else if (wr_addr == DEPTH-1)
 			wr_addr <= '0;
 		
-		count <= (wr_addr>rd_addr)? (wr_addr-rd_addr):(rd_addr-wr_addr);
 		
 	end
 endmodule	
