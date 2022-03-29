@@ -74,8 +74,9 @@ module dram_ctrl_top_tb;
             #5 l2_req_data <= $urandom;
         end
 
-
-        @(dut.dram_fsm.access_count == 0);
+        for(i=0; i<128; i=i+1) begin
+            @(dut.dram_fsm.access_count == 0);
+        end
 
 
         #10 l2_rw_req <= 1'b0; // read from DRAM
@@ -92,14 +93,14 @@ module dram_ctrl_top_tb;
                     $time, dut.l2_req_buffer.rd_en, dut.l2_req_buffer.wr_en, dut.l2_req_instr, dut.l2_buffer_out);
     end
 
-    initial begin : monitor_FSM
-        @(dut.dram_fsm.present_state)
-        $monitor("[$monitor] time=%0t present_state=%0b next_state=%0b", $time, dut.dram_fsm.present_state, dut.dram_fsm.next_state);
-    end
+    // initial begin : monitor_FSM
+    //     @(dut.dram_fsm.present_state)
+    //     $monitor("[$monitor] time=%0t present_state=%0b next_state=%0b", $time, dut.dram_fsm.present_state, dut.dram_fsm.next_state);
+    // end
 
     initial begin : address_translator
         @(dut.address_translate.l2_req_address)
-         $monitor("[$monitor] time=%0t l2_req_address=%0b bankid=%d rowid=%d colid=%d offset=%d", $time, dut.address_translate.l2_req_address, 
+         $monitor("[$monitor] time=%0t l2_req_address=%0h bankid=%0d rowid=%0d colid=%0d offset=%0d", $time, dut.address_translate.l2_req_address, 
                     dut.address_translate.bank_id, dut.address_translate.row_id, dut.address_translate.col_id, dut.address_translate.offset);
     end
 
