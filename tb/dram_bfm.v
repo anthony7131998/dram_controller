@@ -28,12 +28,11 @@ module dram_bfm #(
     reg [DATA_WIDTH-1:0] bank5 [NUM_OF_ROWS-1:0][NUM_OF_COLS-1:0];
     reg [DATA_WIDTH-1:0] bank6 [NUM_OF_ROWS-1:0][NUM_OF_COLS-1:0];
     reg [DATA_WIDTH-1:0] bank7 [NUM_OF_ROWS-1:0][NUM_OF_COLS-1:0];
-
-    reg tmp_data;
+    reg data_out;
 
     reg [7:0] buffers [NUM_OF_BANKS-1:0];
 
-    assign data = bank_rw ? data : 'bz;
+    assign data = (!bank_rw && !buffer_rw) ? data_out : 1'bz;
 
     always @(posedge clk or negedge rst_b) begin
         if(!rst_b) begin
@@ -54,7 +53,7 @@ module dram_bfm #(
         end else begin
             if(bank_rw) begin
                 case(bank_id)
-                    3'b000: bank0[rowid][colid] <= tmp_data;
+                    3'b000: bank0[rowid][colid] <= data;
                     3'b001: bank1[rowid][colid] <= data;
                     3'b010: bank2[rowid][colid] <= data;
                     3'b011: bank3[rowid][colid] <= data;
@@ -80,18 +79,18 @@ module dram_bfm #(
 
     always @(posedge clk or negedge rst_b) begin
         if(!rst_b) begin
-            data <= '0;
+            data_out <= '0;
         end else begin
             if(!buffer_rw) begin
                 case(bank_id)
-                    3'b000: data <= buffers[0];
-                    3'b001: data <= buffers[1];
-                    3'b010: data <= buffers[2];
-                    3'b011: data <= buffers[3];
-                    3'b100: data <= buffers[4];
-                    3'b101: data <= buffers[5];
-                    3'b110: data <= buffers[6];
-                    3'b111: data <= buffers[7];
+                    3'b000: data_out <= buffers[0];
+                    3'b001: data_out <= buffers[1];
+                    3'b010: data_out <= buffers[2];
+                    3'b011: data_out <= buffers[3];
+                    3'b100: data_out <= buffers[4];
+                    3'b101: data_out <= buffers[5];
+                    3'b110: data_out <= buffers[6];
+                    3'b111: data_out <= buffers[7];
                 endcase
             end
         end

@@ -103,9 +103,9 @@ module dram_ctrl_top_tb;
     end
 
     initial begin : monitor_bfm
-        @(bfm.din)
-            $monitor("[$monitor] time=%0t din=%0h bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, dout= %0h", $time, bfm.din, bfm.bank_rw,
-                    bfm.bank_id, bfm.rowid, bfm.colid, bfm.buffer_rw, bfm.dout);
+        @(bfm.data)
+            $monitor("[$monitor] time=%0t bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, data= %0h", $time, bfm.bank_rw,
+                    bfm.bank_id, bfm.rowid, bfm.colid, bfm.buffer_rw, bfm.data);
     end
 
     always @(cmd_req) begin : models_handshake
