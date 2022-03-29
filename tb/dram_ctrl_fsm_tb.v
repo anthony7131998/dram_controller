@@ -74,7 +74,7 @@ module dram_ctrl_fsm_tb;
 
         @(address_buff_en);
 
-        for(i=0; i<100; i=i+1) begin
+        for(i=0; i<2000; i=i+1) begin
             #16;
         end
 

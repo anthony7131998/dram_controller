@@ -2,6 +2,7 @@
 
 module dram_ctrl_top_tb;
 
+    integer total_errors = 0;
     localparam integer L2_REQ_WIDTH=22;
     localparam integer DATA_WIDTH=8;
     localparam integer NUM_OF_BANKS=8;
@@ -9,14 +10,14 @@ module dram_ctrl_top_tb;
     localparam integer NUM_OF_COLS=8;
     localparam integer CONCAT_ADDRESS = 20;
 
-    reg clk;
-    reg rst_b;
-    reg l2_rw_req;
-    reg cmd_ack;
+    reg clk = 1'b0;
+    reg rst_b = '0;
+    reg l2_rw_req = '0;
+    reg cmd_ack = '0;
 
-    reg [DATA_WIDTH-1:0] l2_req_data;
-    reg [L2_REQ_WIDTH-1:0] l2_req_instr;
-    wire dram_data;
+    reg [DATA_WIDTH-1:0] l2_req_data = '0;
+    reg [L2_REQ_WIDTH-1:0] l2_req_instr = '0;
+    wire dram_data = 1'b0;
 
     reg cmd_req;
     reg [1:0] cmd;
@@ -61,6 +62,28 @@ module dram_ctrl_top_tb;
         integer i;
         #10 rst_b <= 1'b0;
         #10 rst_b <= 1'b1;
+
+        l2_rw_req <= 1'b1; // write to DRAM
         
+        for(i=0; i<10; i=i+1) begin
+            #10 l2_req_instr <= $urandom;
+            #10 l2_req_data <= $urandom;
+        end
+
+        disable generate_clk;
     end
+
+    initial begin : monitor_buffers
+        $monitor("[$monitor] time=%0t addr_buffer_in=%0h addr_buffer_out=%0h", $time, dut.l2_req_instr, dut.l2_buffer_out);
+    end
+
+    always @(cmd_req) begin : models_handshake
+        if(cmd_req) begin
+            #8 cmd_ack <= 1'b1;
+        end else begin
+            #8 cmd_ack <= 1'b0;
+        end
+    end
+
+
 endmodule

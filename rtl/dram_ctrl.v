@@ -86,7 +86,7 @@ module dram_ctrl #(
     ) l2_req_buffer (
         .datain     (l2_req_instr),
         .clk        (clk),
-        .rd_en      (address_buff_en),
+        .rd_en      (address_en),
         .wr_en      (1'b1),
         .rst_b      (rst_b),
         .dataout    (l2_buffer_out),
@@ -189,7 +189,7 @@ module dram_ctrl #(
     ) dram_fsm (
         .clk                (clk),
         .rst_b              (rst_b),
-        .addr_val           (address_en),
+        .addr_val           (1'b1),
         .refresh_flag       (refresh_flag),
         .bank_id            (address_buff_bankid),
         .row_id             (address_buff_rowid),
