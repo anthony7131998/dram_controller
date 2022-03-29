@@ -77,7 +77,7 @@ module dram_ctrl_top_tb;
             #5 l2_req_instr <= l2_req_instr - 1'b1;
         end
 
-        for (i=0; i<64; i=i+1) begin
+        for (i=0; i<10; i=i+1) begin
             #10;
         end 
 
