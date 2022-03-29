@@ -70,7 +70,7 @@ module dram_ctrl_top_tb;
             #5 l2_req_data <= $urandom;
         end
 
-        for (i=0; i<64; i=i+1) begin
+ for (i=0; i<25; i=i+1) begin
             #10;
         end 
 
@@ -86,6 +86,13 @@ module dram_ctrl_top_tb;
         @(dut.dram_fsm.present_state)
         $monitor("[$monitor] time=%0t present_state=%0b next_state=%0b", $time, dut.dram_fsm.present_state, dut.dram_fsm.next_state);
     end
+
+    initial begin : address_translator
+        @(dut.address_translate.l2_req_address)
+         $monitor("[$monitor] time=%0t l2_req_address=%0b bankid=%d rowid=%d colid=%d offset=%d", $time, dut.address_translate.l2_req_address, 
+                    dut.address_translate.bank_id, dut.address_translate.row_id, dut.address_translate.col_id, dut.address_translate.offset);
+    end
+
 
     always @(cmd_req) begin : models_handshake
         if(cmd_req) begin
