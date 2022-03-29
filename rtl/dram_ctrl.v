@@ -6,7 +6,7 @@
 // L2_REQ : <address, offset>
 
 module dram_ctrl #(
-    parameter integer L2_REQ_WIDTH=22,
+    parameter integer L2_REQ_WIDTH=20,
     parameter integer DATA_WIDTH=8,
     parameter integer NUM_OF_BANKS=8,
     parameter integer NUM_OF_ROWS=128,

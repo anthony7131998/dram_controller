@@ -4,7 +4,7 @@ module dram_ctrl_top_tb;
 
     integer total_errors = 0;
     localparam integer NUM_OF_TESTS = 128;
-    localparam integer L2_REQ_WIDTH=22;
+    localparam integer L2_REQ_WIDTH=20;
     localparam integer DATA_WIDTH=8;
     localparam integer NUM_OF_BANKS=8;
     localparam integer NUM_OF_ROWS=128;
@@ -30,7 +30,7 @@ module dram_ctrl_top_tb;
     reg buf_rw;
 
     dram_ctrl #(
-        .L2_REQ_WIDTH       (22),
+        .L2_REQ_WIDTH       (20),
         .DATA_WIDTH         (8),
         .NUM_OF_BANKS       (8),
         .NUM_OF_ROWS        (128),
@@ -75,11 +75,8 @@ module dram_ctrl_top_tb;
         end
 
 
-        // Fills up L2 Req Buffer
-        for (j=0; j<NUM_OF_TESTS; j=j+1) begin
-            // Writes to DRAM BFM for 1 instruction
-            @(dut.dram_fsm.access_count == 0);
-        end
+        @(dut.dram_fsm.access_count == 0);
+
 
         #10 l2_rw_req <= 1'b0; // read from DRAM
         for(i=0; i<128; i=i+1) begin
