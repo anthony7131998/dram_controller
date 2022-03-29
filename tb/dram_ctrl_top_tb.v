@@ -104,6 +104,12 @@ module dram_ctrl_top_tb;
                     dut.address_translate.bank_id, dut.address_translate.row_id, dut.address_translate.col_id, dut.address_translate.offset);
     end
 
+    initial begin : monitor_bfm
+        @(bfm.din)
+            $monitor("[$monitor] time=%0t din=%0h bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, dout= %0h", $time, bfm.din, bfm.bank_rw,
+                    bfm.bank_id, bfm.rowid, bfm.colid, bfm.buffer_rw, bfm.dout);
+    end
+
     always @(cmd_req) begin : models_handshake
         if(cmd_req) begin
             #8 cmd_ack <= 1'b1;
