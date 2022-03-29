@@ -77,6 +77,11 @@ module dram_ctrl_top_tb;
         $monitor("[$monitor] time=%0t addr_buffer_in=%0h addr_buffer_out=%0h", $time, dut.l2_req_instr, dut.l2_buffer_out);
     end
 
+    initial begin : monitor_FSM
+        @(dut.dram_fsm.present_state)
+        $monitor("[$monitor] time=%0t present_state=%0b next_state=%0b", $time, dut.dram_fsm.present_state, dut.dram_fsm.next_state);
+    end
+
     always @(cmd_req) begin : models_handshake
         if(cmd_req) begin
             #8 cmd_ack <= 1'b1;
