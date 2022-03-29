@@ -82,7 +82,7 @@ module dram_ctrl #(
 
     // Instantiations
     dram_buffer #(
-        .WIDTH (22),
+        .WIDTH (20),
         .DEPTH (NUM_OF_ROWS)
     ) l2_req_buffer (
         .datain     (l2_req_instr),
@@ -96,7 +96,7 @@ module dram_ctrl #(
     );
 
     dram_addr_translator #(
-        .ADDR_WIDTH     (22),
+        .ADDR_WIDTH     (20),
         .NUM_OF_BANKS   (8),
         .NUM_OF_ROWS    (128),
         .NUM_OF_COLS    (8)
