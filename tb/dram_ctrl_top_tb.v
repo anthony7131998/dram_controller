@@ -63,14 +63,21 @@ module dram_ctrl_top_tb;
         #10 rst_b <= 1'b0;
         #10 rst_b <= 1'b1;
 
-        l2_rw_req <= 1'b1; // write to DRAM
+        #10 l2_rw_req <= 1'b1; // write to DRAM
+        #10 l2_req_instr <= $urandom;
         
-        for(i=0; i<64; i=i+1) begin
-            #5 l2_req_instr <= $urandom;
+        // Send write instruction and data
+        for(i=0; i<128; i=i+1) begin
+            #5 l2_req_instr <= l2_req_instr + 1'b1;
             #5 l2_req_data <= $urandom;
         end
 
- for (i=0; i<25; i=i+1) begin
+        #10 l2_rw_req <= 1'b0; // read from DRAM
+        for(i=0; i<64; i=i+1) begin
+            #5 l2_req_instr <= l2_req_instr - 1'b1;
+        end
+
+        for (i=0; i<64; i=i+1) begin
             #10;
         end 
 
