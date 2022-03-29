@@ -3,15 +3,15 @@
 module counter #(
     parameter width=36
 ) ( input clk,
-    input rst,
+    input rst_b,
     input en,
     output reg refresh_flag
 );
 
 	reg [width-1:0] count;
 				   
-    always @ (posedge clk) begin
-        if (rst) begin
+    always @ (posedge clk or negedge rst_b) begin
+        if (!rst_b) begin
             count <= '0;
             refresh_flag <= 1'b0;
             
