@@ -69,7 +69,7 @@ module dram_ctrl #(
     reg [$clog2(NUM_OF_COLS)-1:0] address_buff_colid;
 
     always @(*) begin
-        address_trans_out = {bank_id, row_id, col_id, offset};
+        address_trans_out = {row_offset, bank_id, row_id, col_id};
         address_buff_offset = address_trans_out[CONCAT_ADDRESS-1:CONCAT_ADDRESS-7];
         address_buff_bankid = address_trans_out[CONCAT_ADDRESS-8:CONCAT_ADDRESS-10];
         address_buff_rowid = address_trans_out[CONCAT_ADDRESS-11:CONCAT_ADDRESS-17]; //this is input to incrementer
