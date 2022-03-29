@@ -18,7 +18,7 @@ module dram_ctrl_top_tb;
 
     reg [DATA_WIDTH-1:0] l2_req_data = '0;
     reg [L2_REQ_WIDTH-1:0] l2_req_instr = '0;
-    wire dram_data = 1'b0;
+    wire dram_data;
 
     reg cmd_req;
     reg [1:0] cmd;
@@ -46,13 +46,12 @@ module dram_ctrl_top_tb;
     ) bfm (
         .clk        (clk),
         .rst_b      (rst_b),
-        .din        (dram_data),
         .bank_rw    (bank_rw),
         .bank_id    (dut.bank_id), //the sels will be encoded back to bank ids for the sake of dram bfm
         .rowid      (dut.row_id),
         .colid      (dut.col_id),
         .buffer_rw  (buf_rw),
-        .dout       (dram_data)
+        .data       (dram_data)
     );
 
     initial begin : generate_clk
@@ -77,7 +76,6 @@ module dram_ctrl_top_tb;
         for(i=0; i<128; i=i+1) begin
             @(dut.dram_fsm.access_count == 0);
         end
-
 
         #10 l2_rw_req <= 1'b0; // read from DRAM
         for(i=0; i<128; i=i+1) begin

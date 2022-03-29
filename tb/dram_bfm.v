@@ -11,11 +11,10 @@ module dram_bfm #(
     input rst_b,
     input bank_rw,
     input buffer_rw,
-    input [DATA_WIDTH-1:0] din,
     input [$clog2(NUM_OF_BANKS)-1:0] bank_id,
     input [$clog2(NUM_OF_ROWS)-1:0] rowid,
     input [$clog2(NUM_OF_COLS)-1:0] colid,
-    output reg [DATA_WIDTH-1:0] dout
+    inout data
 );
 
     integer i;
@@ -30,11 +29,14 @@ module dram_bfm #(
     reg [DATA_WIDTH-1:0] bank6 [NUM_OF_ROWS-1:0][NUM_OF_COLS-1:0];
     reg [DATA_WIDTH-1:0] bank7 [NUM_OF_ROWS-1:0][NUM_OF_COLS-1:0];
 
+    reg tmp_data;
+
     reg [7:0] buffers [NUM_OF_BANKS-1:0];
+
+    assign data = bank_rw ? data : 'bz;
 
     always @(posedge clk or negedge rst_b) begin
         if(!rst_b) begin
-            dout <= '0;
             for (i=0; i<NUM_OF_ROWS; i=i+1) begin
                 for (j=0; j<NUM_OF_COLS; j=j+1) begin
                     bank0[i][j] <= '0;
@@ -45,19 +47,21 @@ module dram_bfm #(
                     bank5[i][j] <= '0;
                     bank6[i][j] <= '0;
                     bank7[i][j] <= '0;
+
+                    buffers[j] <= '0;
                 end
             end
         end else begin
             if(bank_rw) begin
                 case(bank_id)
-                    3'b000: bank0[rowid][colid] <= din;
-                    3'b001: bank1[rowid][colid] <= din;
-                    3'b010: bank2[rowid][colid] <= din;
-                    3'b011: bank3[rowid][colid] <= din;
-                    3'b100: bank4[rowid][colid] <= din;
-                    3'b101: bank5[rowid][colid] <= din;
-                    3'b110: bank6[rowid][colid] <= din;
-                    3'b111: bank7[rowid][colid] <= din;
+                    3'b000: bank0[rowid][colid] <= tmp_data;
+                    3'b001: bank1[rowid][colid] <= data;
+                    3'b010: bank2[rowid][colid] <= data;
+                    3'b011: bank3[rowid][colid] <= data;
+                    3'b100: bank4[rowid][colid] <= data;
+                    3'b101: bank5[rowid][colid] <= data;
+                    3'b110: bank6[rowid][colid] <= data;
+                    3'b111: bank7[rowid][colid] <= data;
                 endcase
             end else if(buffer_rw) begin
                 case(bank_id)
@@ -76,18 +80,18 @@ module dram_bfm #(
 
     always @(posedge clk or negedge rst_b) begin
         if(!rst_b) begin
-            dout <= '0;
+            data <= '0;
         end else begin
             if(!buffer_rw) begin
                 case(bank_id)
-                    3'b000: dout <= buffers[0];
-                    3'b001: dout <= buffers[1];
-                    3'b010: dout <= buffers[2];
-                    3'b011: dout <= buffers[3];
-                    3'b100: dout <= buffers[4];
-                    3'b101: dout <= buffers[5];
-                    3'b110: dout <= buffers[6];
-                    3'b111: dout <= buffers[7];
+                    3'b000: data <= buffers[0];
+                    3'b001: data <= buffers[1];
+                    3'b010: data <= buffers[2];
+                    3'b011: data <= buffers[3];
+                    3'b100: data <= buffers[4];
+                    3'b101: data <= buffers[5];
+                    3'b110: data <= buffers[6];
+                    3'b111: data <= buffers[7];
                 endcase
             end
         end
