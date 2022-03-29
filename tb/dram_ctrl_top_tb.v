@@ -77,10 +77,6 @@ module dram_ctrl_top_tb;
             #5 l2_req_instr <= l2_req_instr - 1'b1;
         end
 
-        for (i=0; i<10; i=i+1) begin
-            #10;
-        end 
-
         disable generate_clk;
     end
 
@@ -100,7 +96,6 @@ module dram_ctrl_top_tb;
                     dut.address_translate.bank_id, dut.address_translate.row_id, dut.address_translate.col_id, dut.address_translate.offset);
     end
 
-
     always @(cmd_req) begin : models_handshake
         if(cmd_req) begin
             #8 cmd_ack <= 1'b1;
@@ -108,6 +103,5 @@ module dram_ctrl_top_tb;
             #8 cmd_ack <= 1'b0;
         end
     end
-
 
 endmodule
