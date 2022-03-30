@@ -63,7 +63,7 @@ module dram_ctrl_fsm #(
         count_en = 1'b1;
         buf_rw = 0;
         bank_rw = 0;
-        count_en = 1'b0;
+        count_en = 1'b1;
         cmd = 2'b00;
         bank_rw = '0;
         buf_rw = '0; 
