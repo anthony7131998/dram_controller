@@ -75,8 +75,11 @@ module dram_ctrl #(
         address_buff_rowid = address_trans_out[CONCAT_ADDRESS-11:CONCAT_ADDRESS-17]; //this is input to incrementer
         address_buff_colid = address_trans_out[CONCAT_ADDRESS-18:CONCAT_ADDRESS-20]; //this is input to incrementer
         inc_col_id = col_inc ? address_buff_colid + 1'b1 : address_buff_colid;
-        inc_row_id = row_inc ? address_buff_rowid + 1'b1 : address_buff_rowid;
+        inc_row_id = row_inc ? address_buff_rowid + 1'b1 : address_buff_rowid; //move this in counter blocks,
     end
+
+    //ToDo:insert counter blocks here
+
 
     assign dram_data = l2_rw_req ? tmp_dram_bit_data : 'bz;
 
@@ -142,13 +145,11 @@ module dram_ctrl #(
     );
 
     dram_decoder3x8 bank_decoder(
-        .en     (bank_en),
         .din    (address_buff_bankid),
         .dout   (bank_sel)
     );
 
     dram_decoder3x8 col_decoder(
-        .en     (col_en),
         .din    (inc_col_id),  //need to make module to drive this
         .dout   (col_sel)
     );
