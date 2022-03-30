@@ -50,7 +50,7 @@ module dram_ctrl #(
     wire tmp_dram_bit_data;
 
     wire addr_val;
-    wire address_en;
+    wire addr_buff_en;
     wire row_en;
     wire col_en;
     wire bank_en;
@@ -87,7 +87,7 @@ module dram_ctrl #(
     ) l2_req_buffer (
         .datain     (l2_req_instr),
         .clk        (clk),
-        .rd_en      (address_en),
+        .rd_en      (addr_buff_en),
         .wr_en      (1'b1),
         .rst_b      (rst_b),
         .dataout    (l2_buffer_out),
@@ -204,7 +204,7 @@ module dram_ctrl #(
         .row_en             (row_en),
         .col_en             (col_en),
         .bank_en            (bank_en),
-        .address_buff_en    (address_en),
+        .address_buff_en    (addr_buff_en),
         .bank_rw            (bank_rw),
         .buf_rw             (buf_rw),
         .cmd_ack            (cmd_ack)

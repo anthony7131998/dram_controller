@@ -40,7 +40,7 @@ module dram_bfm #(
     reg [7:0] buffer_tmp6;
     reg [7:0] buffer_tmp7;
 
-    assign data = (!buffer_rw) ? data_out : 1'bz;
+    assign data = (!bank_rw) ? data_out : 1'bz;
 
     always @(posedge clk or negedge rst_b) begin
         if(!rst_b) begin
