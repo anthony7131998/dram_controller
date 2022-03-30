@@ -21,7 +21,6 @@ module dram_ctrl_top_tb;
 
     //bidir
     wire dram_data;
-    reg data_reg = 1'bz;
 
     reg cmd_req;
     reg [1:0] cmd;
@@ -86,10 +85,12 @@ module dram_ctrl_top_tb;
             @(dut.dram_fsm.access_count == 0);
         end
 
-        #10 l2_rw_req <= 1'b0; // read from DRAM
-        for(i=0; i<128; i=i+1) begin
-            #5 l2_req_instr <= l2_req_instr - 1'b1;
-        end
+        // ToDo: Read deassert
+
+        // waits for refresh
+        @(dut.refresh_flag);
+
+        #100;
 
         disable generate_clk;
     end
