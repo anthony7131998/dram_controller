@@ -78,8 +78,18 @@ module dram_ctrl #(
         inc_row_id = row_inc ? address_buff_rowid + 1'b1 : address_buff_rowid; //move this in counter blocks
     end
 
-    //ToDo:insert counter blocks here
-
+    //ToDo:insert counter blocks here   
+    always@(posedge)
+    begin
+        if (col_inc) begin
+            inc_col_id = address_buff_colid + 1'b1;
+            address_buff_colid = inc_col_id;
+        end
+        if (row_inc) begin
+            inc_row_id = address_buff_rowid + 1'b1;
+            address_buff_rowid = inc_row_id;
+        end
+    end
 
     assign dram_data = l2_rw_req ? tmp_dram_bit_data : 'bz;
 
