@@ -75,7 +75,7 @@ module dram_ctrl #(
         address_buff_rowid = address_trans_out[CONCAT_ADDRESS-11:CONCAT_ADDRESS-17]; //this is input to incrementer
         address_buff_colid = address_trans_out[CONCAT_ADDRESS-18:CONCAT_ADDRESS-20]; //this is input to incrementer
         inc_col_id = col_inc ? address_buff_colid + 1'b1 : address_buff_colid;
-        inc_row_id = row_inc ? address_buff_rowid + 1'b1 : address_buff_rowid; //move this in counter blocks,
+        inc_row_id = row_inc ? address_buff_rowid + 1'b1 : address_buff_rowid; //move this in counter blocks
     end
 
     //ToDo:insert counter blocks here
