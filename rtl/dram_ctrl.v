@@ -28,9 +28,7 @@ module dram_ctrl #(
     output [NUM_OF_BANKS-1:0] bank_sel,
     output [NUM_OF_ROWS-1:0] row_sel,
     output [NUM_OF_COLS-1:0] col_sel,
-    output [DATA_WIDTH-1:0] l2_rsp_data,
-    output bank_rw,
-    output buf_rw
+    output [DATA_WIDTH-1:0] l2_rsp_data
 );
 
 // Internal Signal Declarations and Assignments
@@ -59,6 +57,7 @@ module dram_ctrl #(
     wire refresh_flag;
     wire row_inc;
     wire col_inc;
+    wire load_data;
 
     reg [CONCAT_ADDRESS-1:0] address_trans_out;
     reg [CONCAT_ADDRESS-1:0] address_buff_out;
@@ -80,18 +79,23 @@ module dram_ctrl #(
     end
 
     //ToDo:insert counter blocks here   
-    always@(posedge clk)  begin : col_and_row_counters
-        if (col_en) begin
-            inc_col_id <= address_buff_colid;
-        end
-        if (row_en) begin
-            inc_row_id <= address_buff_rowid;
-        end
-        if (col_inc) begin
-            inc_col_id <= inc_col_id + 1'b1;
-        end
-        if (row_inc) begin
-            inc_row_id <= inc_row_id + 1'b1;
+    always@(posedge clk or negedge rst_b)  begin : col_and_row_counters
+        if (!rst_b) begin
+            inc_col_id <= 0;
+            inc_row_id <= 0;
+        end else begin
+            if (col_en) begin
+                inc_col_id <= address_buff_colid;
+            end
+            if (row_en) begin
+                inc_row_id <= address_buff_rowid;
+            end
+            if (col_inc) begin
+                inc_col_id <= inc_col_id + 1'b1;
+            end
+            if (row_inc) begin
+                inc_row_id <= inc_row_id + 1'b1;
+            end
         end
     end
 
@@ -130,7 +134,8 @@ module dram_ctrl #(
     ) dram_piso (
         .clk        (clk),
         .rst_b      (rst_b),
-        .load       (addr_buff_en),
+        .load       (load_data),
+        .shift      (col_inc),
         .data_in    (l2_req_data), 
         .data_out   (tmp_dram_bit_data)
     );
@@ -197,6 +202,7 @@ module dram_ctrl #(
         .col_id             (address_buff_colid),
         .offset             (address_buff_offset),
         .cmd_req            (cmd_req),
+        .load_data          (load_data),
         .count_en           (cnt_en),
         .row_inc            (row_inc), // still needs to be used for incrementer
         .col_inc            (col_inc), // still needs to be used for incrementer
@@ -205,8 +211,6 @@ module dram_ctrl #(
         .col_en             (col_en),
         .bank_en            (bank_en),
         .address_buff_en    (addr_buff_en),
-        .bank_rw            (bank_rw),
-        .buf_rw             (buf_rw),
         .cmd_ack            (cmd_ack)
     );
 

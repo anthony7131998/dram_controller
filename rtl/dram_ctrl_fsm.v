@@ -22,10 +22,9 @@ module dram_ctrl_fsm #(
     output reg [1:0] cmd,
     output reg row_en,
     output reg col_en,
+    output reg load_data,
     output reg bank_en,
-    output reg address_buff_en,
-    output reg bank_rw,
-    output reg buf_rw
+    output reg address_buff_en
 );
 
     // State Declarations
@@ -59,18 +58,15 @@ module dram_ctrl_fsm #(
     end
 
     always @ (*) begin
-        count_en = 1'b1;
-        buf_rw = 0;
-        bank_rw = 0;
+
         count_en = 1'b1;
         cmd = 2'b00;
-        bank_rw = '0;
-        buf_rw = '0; 
         row_en = 1'b0;
         col_en = 1'b0;
         bank_en = 1'b0;
         row_inc = 1'b0;
         col_inc = 1'b0;
+        load_data = 1'b0;
         address_buff_en = 1'b0;
 
         next_state = present_state;
@@ -90,9 +86,12 @@ module dram_ctrl_fsm #(
                 if(refresh_flag) begin
                     next_state = REFRESH_STATE;
                 end else if(!cmd_ack) begin
+                    load_data = 1'b1;
+                    if (access_count == 0) begin
+                        next_access_count = offset;
+                        address_buff_en = 1'b1;
+                    end
                     cmd = 2'b00;
-                    bank_rw = 1'b0;
-                    buf_rw = 1'b1;
                     next_state = WAIT_ACK;
                 end
             end
@@ -108,7 +107,6 @@ module dram_ctrl_fsm #(
                         next_state = WAIT_ACK;
                         col_en = 1;
                     end else begin
-                        bank_rw = 1'b1;
                         col_inc = 1'b1;
                         next_col_counter = next_col_counter + 1'b1;
                     end
@@ -125,7 +123,6 @@ module dram_ctrl_fsm #(
                         row_en = 1;
                     end else begin
                         cmd = 2'b11;
-                        bank_rw = 1;
                         next_access_count = access_count - 1'b1;
                         next_state = WAIT_ACK;
                     end

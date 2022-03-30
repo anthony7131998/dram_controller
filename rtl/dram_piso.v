@@ -4,6 +4,7 @@ module dram_piso #(
         input clk,
         input rst_b,
         input load,
+        input shift,
 		input [WIDTH-1:0] data_in,
         output data_out
 	);
@@ -19,7 +20,8 @@ module dram_piso #(
             if (load) begin
                 loaded_value <= data_in;
             end
-            else begin
+
+            if (shift) begin
                 loaded_value <= {1'b0, loaded_value[WIDTH-1:1]};
             end
         end

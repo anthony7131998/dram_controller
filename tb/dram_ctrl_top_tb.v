@@ -31,8 +31,9 @@ module dram_ctrl_top_tb;
     reg [DATA_WIDTH-1:0] l2_rsp_data;
     reg bank_rw;
     reg buf_rw;
+    reg rw;
 
-    // assign dram_data = (buf_rw) ? data_reg : 1'bz;
+    always@(*) rw = (buf_rw || buf_rw) && l2_rw_req;
 
     dram_ctrl #(
         .L2_REQ_WIDTH       (20),
@@ -51,11 +52,10 @@ module dram_ctrl_top_tb;
     ) bfm (
         .clk        (clk),
         .rst_b      (rst_b),
-        .bank_rw    (bank_rw),
+        .rw         (l2_rw_req),
         .bank_id    (dut.bank_id), //the sels will be encoded back to bank ids for the sake of dram bfm
         .rowid      (dut.inc_row_id),
         .colid      (dut.inc_col_id),
-        .buffer_rw  (buf_rw),
         .data       (dram_data)
     );
 
@@ -69,31 +69,37 @@ module dram_ctrl_top_tb;
         #10 rst_b <= 1'b0;
         #10 rst_b <= 1'b1;
 
-        #10 l2_req_instr[L2_REQ_WIDTH-8:L2_REQ_WIDTH-10] <= $urandom % 8; //bankid
-        #10 l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17] <= $urandom % 128; //rowid
-        #10 l2_req_instr[L2_REQ_WIDTH-1:L2_REQ_WIDTH-7] <= $urandom % (l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17]);
         #10 l2_rw_req <= 1'b1; // write to DRAM
+        #10 l2_req_instr[L2_REQ_WIDTH-8:L2_REQ_WIDTH-10] <= $urandom % 8; //bankid
+        #10 l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17] <= $urandom % 128; //rowid 124 -> 125 -> 126.. -> 0
+        #10 l2_req_instr[L2_REQ_WIDTH-1:L2_REQ_WIDTH-7] <= $urandom % (l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17]); // offset 4
 
         // Send write instruction and data
+        l2_cmd_valid = 1'b1;
 
         // Fills up buffer
         for(i=0; i<128; i=i+1) begin
             #10 l2_req_instr <= l2_req_instr + 1'b1;
         end
 
-        #10 l2_cmd_valid = 1'b1;
-
         // Completes all commands in buffer
         for(i=0; i<128*8; i=i+1) begin
-            #5 l2_req_data <= $urandom;
+            l2_req_data <= $urandom;
             @(dut.dram_fsm.access_count == 0);
+            // ToDo: Add a display where it indicates each WRITE to BFM.
+
         end
 
-        // ToDo: Read deassert
+        //ToDo: Fix Reads. Want to REAd at least 10 write commands
+        // 1) Only have l2_rsp_data traffic when l2_rw_req == 0
+        // 2) Trace back from l2_rsp_data to dram_bfm or dram_bfm to l2_rsp_data
+        // 3) Add any logic to meet these basic specs, and ensure the writes and read coherence property matches
+        
         #10 l2_rw_req <= 1'b0; // read from DRAM
-        for(i=0; i<128; i=i+1) begin
+        for(i=0; i<128*8; i=i+1) begin
             #5 l2_req_instr <= l2_req_instr - 1'b1;
             #5;
+            // When access count = 0, display the data for a READ
         end
 
         // waits for refresh
@@ -107,7 +113,7 @@ module dram_ctrl_top_tb;
     initial begin : monitor_buffers
         $timeformat(-3, 9, "ms");
         $monitor("[$monitor] time=%0t rd_en=%0h, wr_en=%0h, addr_buffer_in=%0h, addr_buffer_out=%0h", 
-                    $time, dut.l2_req_buffer.rd_en, dut.l2_req_buffer.wr_en, dut.l2_req_instr, dut.l2_buffer_out);
+                    $time, dut.l2_req_buffer.rd_en, l2_rw_req, dut.l2_req_instr, dut.l2_buffer_out);
     end
 
     // initial begin : monitor_FSM
@@ -126,15 +132,15 @@ module dram_ctrl_top_tb;
     initial begin : monitor_bfm
         $timeformat(-3, 9, "ms");
         @(bfm.data)
-            $monitor("[$monitor] time=%0t bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, data= %0h", $time, bfm.bank_rw,
-                    bfm.bank_id, bfm.rowid, bfm.colid, bfm.buffer_rw, bfm.data);
+            $monitor("[$monitor] time=%0t bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, data= %0h", $time, l2_rw_req,
+                    bfm.bank_id, bfm.rowid, bfm.colid, l2_rw_req, bfm.data);
     end
 
     always @(cmd_req) begin : models_handshake
         if(cmd_req) begin
-            #8 cmd_ack <= 1'b1;
+            #2 cmd_ack <= 1'b1;
         end else begin
-            #8 cmd_ack <= 1'b0;
+            #2 cmd_ack <= 1'b0;
         end
     end
 
