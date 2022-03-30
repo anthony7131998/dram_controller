@@ -18,7 +18,10 @@ module dram_ctrl_top_tb;
 
     reg [DATA_WIDTH-1:0] l2_req_data = '0;
     reg [L2_REQ_WIDTH-1:0] l2_req_instr = '0;
+
+    //bidir
     wire dram_data;
+    reg data_reg;
 
     reg cmd_req;
     reg [1:0] cmd;
@@ -28,6 +31,10 @@ module dram_ctrl_top_tb;
     reg [DATA_WIDTH-1:0] l2_rsp_data;
     reg bank_rw;
     reg buf_rw;
+
+
+    assign dram_data = (buf_rw) ? data_reg : 1'bz;
+
 
     dram_ctrl #(
         .L2_REQ_WIDTH       (20),
@@ -71,6 +78,7 @@ module dram_ctrl_top_tb;
         for(i=0; i<128; i=i+1) begin
             #5 l2_req_instr <= l2_req_instr + 1'b1;
             #5 l2_req_data <= $urandom;
+            #5 data_reg <= $urandom;
         end
 
         for(i=0; i<128; i=i+1) begin
@@ -80,6 +88,7 @@ module dram_ctrl_top_tb;
         #10 l2_rw_req <= 1'b0; // read from DRAM
         for(i=0; i<128; i=i+1) begin
             #5 l2_req_instr <= l2_req_instr - 1'b1;
+            #5 data_reg <= $urandom;
         end
 
 
@@ -103,9 +112,9 @@ module dram_ctrl_top_tb;
     end
 
     initial begin : monitor_bfm
-        @(bfm.din)
-            $monitor("[$monitor] time=%0t din=%0h bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, dout= %0h", $time, bfm.din, bfm.bank_rw,
-                    bfm.bank_id, bfm.rowid, bfm.colid, bfm.buffer_rw, bfm.dout);
+        @(bfm.data)
+            $monitor("[$monitor] time=%0t bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, data= %0h", $time, bfm.bank_rw,
+                    bfm.bank_id, bfm.rowid, bfm.colid, bfm.buffer_rw, bfm.data);
     end
 
     always @(cmd_req) begin : models_handshake
