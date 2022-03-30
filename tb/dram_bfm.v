@@ -44,6 +44,14 @@ module dram_bfm #(
 
     always @(posedge clk or negedge rst_b) begin
         if(!rst_b) begin
+            buffer_tmp0 <= '0;
+            buffer_tmp1 <= '0;
+            buffer_tmp2 <= '0;
+            buffer_tmp3 <= '0;
+            buffer_tmp4 <= '0;
+            buffer_tmp5 <= '0;
+            buffer_tmp6 <= '0;
+            buffer_tmp7 <= '0;
             for (i=0; i<NUM_OF_ROWS; i=i+1) begin
                 for (j=0; j<NUM_OF_COLS; j=j+1) begin
                     bank0[i][j] <= '0;
@@ -54,17 +62,7 @@ module dram_bfm #(
                     bank5[i][j] <= '0;
                     bank6[i][j] <= '0;
                     bank7[i][j] <= '0;
-
                     buffers[j] <= '0;
-                    buffer_tmp0 <= '0;
-                    buffer_tmp1 <= '0;
-                    buffer_tmp2 <= '0;
-                    buffer_tmp3 <= '0;
-                    buffer_tmp4 <= '0;
-                    buffer_tmp5 <= '0;
-                    buffer_tmp6 <= '0;
-                    buffer_tmp7 <= '0;
-
                 end
             end
         end else begin
