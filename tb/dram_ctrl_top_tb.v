@@ -75,16 +75,20 @@ module dram_ctrl_top_tb;
         #10;
 
         // Send write instruction and data
+
+        // Fills up buffer
         for(i=0; i<128; i=i+1) begin
             #5 l2_req_instr <= l2_req_instr + 1'b1;
             #5 l2_req_data <= $urandom;
         end
 
+        // Completes all commands in buffer
         for(i=0; i<128; i=i+1) begin
             @(dut.dram_fsm.access_count == 0);
         end
 
-        // ToDo: Read deassert
+
+        // ToDo: Read cycles and stuff
 
         // waits for refresh
         @(dut.refresh_flag);
