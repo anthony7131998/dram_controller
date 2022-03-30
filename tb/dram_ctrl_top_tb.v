@@ -52,8 +52,8 @@ module dram_ctrl_top_tb;
         .rst_b      (rst_b),
         .bank_rw    (bank_rw),
         .bank_id    (dut.bank_id), //the sels will be encoded back to bank ids for the sake of dram bfm
-        .rowid      (dut.row_id),
-        .colid      (dut.col_id),
+        .rowid      (dut.inc_row_id),
+        .colid      (dut.inc_col_id),
         .buffer_rw  (buf_rw),
         .data       (dram_data)
     );
