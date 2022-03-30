@@ -20,7 +20,7 @@ module counter #(
                 count <= count+1;
                 refresh_flag <= 1'b0;
             end
-            if(count == 7812479) begin
+            if(count == 12500000) begin
                 refresh_flag <= 1'b1;    //assuming clock freq of 150MHz, time period of 7ns, 125 ms = 17857142 cycles
                 count <= '0;
             end
