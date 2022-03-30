@@ -87,6 +87,8 @@ module dram_ctrl_fsm #(
             end
 
             BNR_STATE: begin
+                row_en = 1'b1;
+                col_en = 1'b1;
                 if (access_count == 0) begin
                     next_access_count = offset;
                     address_buff_en = 1'b1;
@@ -95,7 +97,6 @@ module dram_ctrl_fsm #(
                     cmd = 2'b00;
                     buf_rw = 1'b1;
                     bank_en = 1'b1;
-                    row_en = 1'b1;
                     row_inc = 1'b1;
                 end
 

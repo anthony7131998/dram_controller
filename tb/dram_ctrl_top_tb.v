@@ -52,8 +52,8 @@ module dram_ctrl_top_tb;
         .rst_b      (rst_b),
         .bank_rw    (bank_rw),
         .bank_id    (dut.bank_id), //the sels will be encoded back to bank ids for the sake of dram bfm
-        .rowid      (dut.row_id),
-        .colid      (dut.col_id),
+        .rowid      (dut.inc_row_id),
+        .colid      (dut.inc_col_id),
         .buffer_rw  (buf_rw),
         .data       (dram_data)
     );
@@ -69,9 +69,9 @@ module dram_ctrl_top_tb;
         #10 rst_b <= 1'b1;
 
         #10 l2_rw_req <= 1'b1; // write to DRAM
-        l2_req_instr[L2_REQ_WIDTH-8:L2_REQ_WIDTH-10] <= $urandom; //bankid
-        l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17] <= $urandom; //rowid
-        l2_req_instr[L2_REQ_WIDTH-1:L2_REQ_WIDTH-7] <= $urandom - l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17]; // offset
+        l2_req_instr[L2_REQ_WIDTH-8:L2_REQ_WIDTH-10] <= $urandom % 8; //bankid
+        l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17] <= $urandom % 128; //rowid
+        l2_req_instr[L2_REQ_WIDTH-1:L2_REQ_WIDTH-7] <= $urandom % (128-l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17]); // offset 
         #10;
 
         // Send write instruction and data

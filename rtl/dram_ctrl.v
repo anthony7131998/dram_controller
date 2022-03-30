@@ -61,6 +61,8 @@ module dram_ctrl #(
 
     reg [CONCAT_ADDRESS-1:0] address_trans_out;
     reg [CONCAT_ADDRESS-1:0] address_buff_out;
+    reg [$clog2(NUM_OF_ROWS)-1:0] row_count;
+    reg [$clog2(NUM_OF_COLS)-1:0] col_count;
     reg [$clog2(NUM_OF_ROWS)-1:0] inc_row_id;
     reg [$clog2(NUM_OF_COLS)-1:0] inc_col_id;
     reg [$clog2(NUM_OF_ROWS)-1:0] address_buff_offset;
@@ -74,20 +76,21 @@ module dram_ctrl #(
         address_buff_bankid = address_trans_out[CONCAT_ADDRESS-8:CONCAT_ADDRESS-10];
         address_buff_rowid = address_trans_out[CONCAT_ADDRESS-11:CONCAT_ADDRESS-17]; //this is input to incrementer
         address_buff_colid = address_trans_out[CONCAT_ADDRESS-18:CONCAT_ADDRESS-20]; //this is input to incrementer
-        inc_col_id = col_inc ? address_buff_colid + 1'b1 : address_buff_colid;
-        inc_row_id = row_inc ? address_buff_rowid + 1'b1 : address_buff_rowid; //move this in counter blocks
     end
 
     //ToDo:insert counter blocks here   
-    always@(posedge)
-    begin
+    always@(posedge clk)  begin : col_and_row_counters
+        if (col_en) begin
+            inc_col_id <= address_buff_colid;
+        end
+        if (row_en) begin
+            inc_row_id <= address_buff_rowid;
+        end
         if (col_inc) begin
-            inc_col_id = address_buff_colid + 1'b1;
-            address_buff_colid = inc_col_id;
+            inc_col_id <= inc_col_id + 1'b1;
         end
         if (row_inc) begin
-            inc_row_id = address_buff_rowid + 1'b1;
-            address_buff_rowid = inc_row_id;
+            inc_row_id <= inc_row_id + 1'b1;
         end
     end
 
@@ -165,7 +168,6 @@ module dram_ctrl #(
     );
 
     dram_row_decoder row_decoder (
-        .en     (row_en),
         .din    (inc_row_id),  //need to make module to drive this
         .dout   (row_sel)
     );
