@@ -20,7 +20,7 @@ module dram_piso #(
                 loaded_value <= data_in;
             end
             else begin
-                loaded_value <= {1'b0, loaded_value[15:1]};
+                loaded_value <= {1'b0, loaded_value[WIDTH-1:1]};
             end
         end
     end
