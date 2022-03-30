@@ -108,6 +108,7 @@ module dram_ctrl_fsm #(
             end
 
             COL_STATE: begin
+                cmd = 2'b01;
                 if (col_counter == 3'b111)  //checking col count to make sure we havent read the row
                 begin
                     row_inc = 1'b1;
