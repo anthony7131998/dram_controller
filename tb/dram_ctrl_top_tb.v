@@ -51,7 +51,7 @@ module dram_ctrl_top_tb;
         .rowid      (dut.row_id),
         .colid      (dut.col_id),
         .buffer_rw  (buf_rw),
-        .data       (dram_data)
+        .d       (dram_data)
     );
 
     initial begin : generate_clk

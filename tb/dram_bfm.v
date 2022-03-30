@@ -33,7 +33,7 @@ module dram_bfm #(
 
     reg [7:0] buffers [NUM_OF_BANKS-1:0];
 
-    assign data = bank_rw ? data : 'bz;
+    assign data = buffer_rw ? buffers : 'bz;
 
     always @(posedge clk or negedge rst_b) begin
         if(!rst_b) begin
