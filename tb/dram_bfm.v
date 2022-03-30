@@ -42,6 +42,9 @@ module dram_bfm #(
 
     assign data = (!buffer_rw && !bank_rw) ? data_out : 1'bz;
 
+    // bank_rw = 1, buffer_rw = '0
+    // data to be input. 
+
     always @(posedge clk or negedge rst_b) begin
         if(!rst_b) begin
             buffer_tmp0 <= '0;
