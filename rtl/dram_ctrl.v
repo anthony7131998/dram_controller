@@ -17,6 +17,7 @@ module dram_ctrl #(
     input rst_b,
     input l2_rw_req,
     input cmd_ack,
+    input l2_cmd_valid,
 
     input [DATA_WIDTH-1:0] l2_req_data,
     input [L2_REQ_WIDTH-1:0] l2_req_instr,
@@ -107,7 +108,7 @@ module dram_ctrl #(
         .wr_en      (1'b1),
         .rst_b      (rst_b),
         .dataout    (l2_buffer_out),
-        .full_flag  (addr_val),
+        .full_flag  (nc_full_l2_buffer),
         .empty_flag (nc_empty_l2_buffer)
     );
 
@@ -189,7 +190,7 @@ module dram_ctrl #(
     ) dram_fsm (
         .clk                (clk),
         .rst_b              (rst_b),
-        .addr_val           (addr_val),
+        .addr_val           (l2_cmd_valid),
         .refresh_flag       (refresh_flag),
         .bank_id            (address_buff_bankid),
         .row_id             (address_buff_rowid),

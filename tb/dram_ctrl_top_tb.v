@@ -22,6 +22,7 @@ module dram_ctrl_top_tb;
     //bidir
     wire dram_data;
 
+    reg l2_cmd_valid = 0;
     reg cmd_req;
     reg [1:0] cmd;
     reg [NUM_OF_BANKS-1:0] bank_sel;
@@ -70,15 +71,17 @@ module dram_ctrl_top_tb;
 
         #10 l2_req_instr[L2_REQ_WIDTH-8:L2_REQ_WIDTH-10] <= $urandom % 8; //bankid
         #10 l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17] <= $urandom % 128; //rowid
-        #10 l2_req_instr[L2_REQ_WIDTH-1:L2_REQ_WIDTH-7] <= $urandom % l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17];
+        #10 l2_req_instr[L2_REQ_WIDTH-1:L2_REQ_WIDTH-7] <= $urandom % (l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17]);
         #10 l2_rw_req <= 1'b1; // write to DRAM
 
         // Send write instruction and data
 
         // Fills up buffer
         for(i=0; i<128; i=i+1) begin
-            #5 l2_req_instr <= l2_req_instr + 1'b1;
+            #10 l2_req_instr <= l2_req_instr + 1'b1;
         end
+
+        #10 l2_cmd_valid = 1'b1;
 
         // Completes all commands in buffer
         for(i=0; i<128*8; i=i+1) begin
