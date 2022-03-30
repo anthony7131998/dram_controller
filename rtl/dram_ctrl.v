@@ -108,27 +108,13 @@ module dram_ctrl #(
         .offset         (row_offset)
     );
 
-    dram_buffer #(
-        .WIDTH (8),
-        .DEPTH (NUM_OF_ROWS)
-    ) data_buffer (
-        .datain     (l2_req_data),
-        .clk        (clk),
-        .rd_en      (addr_buff_en),
-        .wr_en      (1'b1),
-        .rst_b      (rst_b),
-        .dataout    (data_buffer_out),
-        .full_flag  (nc_full_data_buffer),
-        .empty_flag (nc_empty_data_buffer)
-    );
-
     dram_piso #(
         .WIDTH (8)
     ) dram_piso (
         .clk        (clk),
         .rst_b      (rst_b),
         .load       (addr_buff_en),
-        .data_in    (data_buffer_out), 
+        .data_in    (l2_req_data), 
         .data_out   (tmp_dram_bit_data)
     );
 
