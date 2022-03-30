@@ -87,11 +87,16 @@ module dram_ctrl_top_tb;
             @(dut.dram_fsm.access_count == 0);
         end
 
+        // ToDo: Read deassert
+        #10 l2_rw_req <= 1'b0; // read from DRAM
+        for(i=0; i<128; i=i+1) begin
+            #5 l2_req_instr <= l2_req_instr - 1'b1;
+            #5;
+        end
 
-        // ToDo: Read cycles and stuff
 
         // waits for refresh
-        @(dut.refresh_flag);
+        //@(dut.refresh_flag);
 
         #100;
 
