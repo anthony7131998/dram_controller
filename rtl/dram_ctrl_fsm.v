@@ -34,6 +34,7 @@ module dram_ctrl_fsm #(
     localparam COL_STATE = 3'b010;
     localparam PRECHARGE_STATE = 3'b011;
     localparam REFRESH_STATE = 3'b100;
+    localparam WAIT_ACK = 3'b101;
 
     reg [2:0] present_state, next_state, prev_state;
     reg [$clog2(NUMBER_OF_BANKS)-1:0]  prev_bank_id;
@@ -57,9 +58,7 @@ module dram_ctrl_fsm #(
         end
     end
 
-    always @ (*)
-    begin
-        
+    always @ (*) begin
         count_en = 1'b1;
         buf_rw = 0;
         bank_rw = 0;
@@ -83,59 +82,66 @@ module dram_ctrl_fsm #(
                 next_state = IDLE_STATE;
                 if(addr_val) begin
                     next_state = BNR_STATE;
+                    address_buff_en = 1'b1;
                 end
             end
 
             BNR_STATE: begin
-                row_en = 1'b1;
-                col_en = 1'b1;
-                if (access_count == 0) begin
-                    next_access_count = offset;
-                    address_buff_en = 1'b1;
-                end else begin
-                    next_access_count = access_count - 1'b1;
-                    cmd = 2'b00;
-                    buf_rw = 1'b1;
-                    bank_en = 1'b1;
-                    row_inc = 1'b1;
-                end
-
                 if(refresh_flag) begin
                     next_state = REFRESH_STATE;
-                end else if(cmd_ack) begin
-                    next_state = COL_STATE;
+                end else if(!cmd_ack) begin
+                    cmd = 2'b00;
+                    bank_rw = 1'b0;
+                    buf_rw = 1'b1;
+                    next_state = WAIT_ACK;
                 end
-
             end
 
             COL_STATE: begin
-                cmd = 2'b01;
-                if (col_counter == 3'b111)  //checking col count to make sure we havent read the row
-                begin
-                    row_inc = 1'b1;
-                    next_col_counter = '0;
-                    if(refresh_flag) begin
-                        next_state = REFRESH_STATE;
-                    end else if (cmd_ack) begin
-                        next_state = PRECHARGE_STATE;
+                if(refresh_flag) begin
+                    next_state = REFRESH_STATE;
+                end else if (!cmd_ack) begin
+                    cmd = 2'b01;
+                    if (col_counter == 3'b111)  begin
+                        row_inc = 1'b1;
+                        next_col_counter = '0;
+                        next_state = WAIT_ACK;
+                        col_en = 1;
+                    end else begin
+                        bank_rw = 1'b1;
+                        col_inc = 1'b1;
+                        next_col_counter = next_col_counter + 1'b1;
                     end
-                end
-                else begin
-                    bank_rw = 1'b1;
-                    col_inc = 1'b1;
-                    next_col_counter = next_col_counter + 1'b1;
                 end
             end
 
             PRECHARGE_STATE: begin
                 if(refresh_flag) begin
                     next_state = REFRESH_STATE;
-                end else if(cmd_ack) begin
-                    next_state = BNR_STATE;
+                end else if(!cmd_ack) begin
+                    if (access_count == 0) begin
+                        next_access_count = offset;
+                        address_buff_en = 1'b1;
+                        row_en = 1;
+                    end else begin
+                        cmd = 2'b11;
+                        bank_rw = 1;
+                        next_access_count = access_count - 1'b1;
+                        next_state = WAIT_ACK;
+                    end
                 end
+            end
 
-                cmd = 2'b11;
-                bank_rw = 1;
+            WAIT_ACK: begin
+                if(refresh_flag) begin
+                    next_state = REFRESH_STATE;
+                end else if (cmd_ack) begin
+                    case(prev_state)
+                        BNR_STATE: next_state = COL_STATE;
+                        COL_STATE: next_state = PRECHARGE_STATE;
+                        PRECHARGE_STATE: next_state = BNR_STATE;
+                    endcase
+                end
             end
 
             REFRESH_STATE: begin
@@ -150,18 +156,13 @@ module dram_ctrl_fsm #(
     end
 
     always @(*) begin
-        prev_state = present_state;
-        if(refresh_flag) begin
+        // prev_state = present_state;
+        if(refresh_flag || next_state==WAIT_ACK) begin
             case(present_state)
-                BNR_STATE: begin
-                    prev_state = BNR_STATE;
-                end
-                COL_STATE: begin
-                    prev_state = COL_STATE;
-                end
-                PRECHARGE_STATE: begin
-                    prev_state = PRECHARGE_STATE;
-                end
+                BNR_STATE: prev_state = BNR_STATE;
+                COL_STATE: prev_state = COL_STATE;
+                PRECHARGE_STATE: prev_state = PRECHARGE_STATE;
+                // WAIT_ACK: prev_state = WAIT_ACK;
             endcase
         end
     end

@@ -105,10 +105,10 @@ module dram_ctrl #(
         .datain     (l2_req_instr),
         .clk        (clk),
         .rd_en      (addr_buff_en),
-        .wr_en      (1'b1),
+        .wr_en      (l2_cmd_valid),
         .rst_b      (rst_b),
         .dataout    (l2_buffer_out),
-        .full_flag  (nc_full_l2_buffer),
+        .full_flag  (addr_val),
         .empty_flag (nc_empty_l2_buffer)
     );
 
@@ -190,7 +190,7 @@ module dram_ctrl #(
     ) dram_fsm (
         .clk                (clk),
         .rst_b              (rst_b),
-        .addr_val           (l2_cmd_valid),
+        .addr_val           (addr_val),
         .refresh_flag       (refresh_flag),
         .bank_id            (address_buff_bankid),
         .row_id             (address_buff_rowid),
