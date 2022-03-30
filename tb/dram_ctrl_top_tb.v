@@ -32,7 +32,7 @@ module dram_ctrl_top_tb;
     reg bank_rw;
     reg buf_rw;
 
-    assign dram_data = (buf_rw) ? data_reg : 1'bz;
+    // assign dram_data = (buf_rw) ? data_reg : 1'bz;
 
     dram_ctrl #(
         .L2_REQ_WIDTH       (20),
