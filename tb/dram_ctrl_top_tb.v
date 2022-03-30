@@ -103,6 +103,7 @@ module dram_ctrl_top_tb;
     end
 
     initial begin : monitor_buffers
+        $timeformat(-3, 9, "ms");
         $monitor("[$monitor] time=%0t rd_en=%0h, wr_en=%0h, addr_buffer_in=%0h, addr_buffer_out=%0h", 
                     $time, dut.l2_req_buffer.rd_en, dut.l2_req_buffer.wr_en, dut.l2_req_instr, dut.l2_buffer_out);
     end
@@ -113,12 +114,15 @@ module dram_ctrl_top_tb;
     // end
 
     initial begin : address_translator
+        $timeformat(-3, 9, "ms");
         @(dut.address_translate.l2_req_address)
-         $monitor("[$monitor] time=%0t l2_req_address=%0h bankid=%0d rowid=%0d colid=%0d offset=%0d", $time, dut.address_translate.l2_req_address, 
+
+            $monitor("[$monitor] time=%0t l2_req_address=%0h bankid=%0d rowid=%0d colid=%0d offset=%0d", $time, dut.address_translate.l2_req_address, 
                     dut.address_translate.bank_id, dut.address_translate.row_id, dut.address_translate.col_id, dut.address_translate.offset);
     end
 
     initial begin : monitor_bfm
+        $timeformat(-3, 9, "ms");
         @(bfm.data)
             $monitor("[$monitor] time=%0t bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, data= %0h", $time, bfm.bank_rw,
                     bfm.bank_id, bfm.rowid, bfm.colid, bfm.buffer_rw, bfm.data);
@@ -130,6 +134,11 @@ module dram_ctrl_top_tb;
         end else begin
             #8 cmd_ack <= 1'b0;
         end
+    end
+
+    always @(dut.refresh_flag) begin : monitor_refresh_state
+        $timeformat(-3, 9, "ms");
+        if(dut.refresh_flag) $display("time=%0t REFRESH DRAM", $time);
     end
 
 endmodule
