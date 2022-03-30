@@ -119,6 +119,7 @@ module dram_ctrl_fsm #(
                     end
                 end
                 else begin
+                    bank_rw = 1'b1;
                     col_inc = 1'b1;
                     next_col_counter = next_col_counter + 1'b1;
                 end

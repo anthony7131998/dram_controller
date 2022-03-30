@@ -83,7 +83,7 @@ module dram_ctrl_top_tb;
         end
 
         // Completes all commands in buffer
-        for(i=0; i<128; i=i+1) begin
+        for(i=0; i<128*8; i=i+1) begin
             @(dut.dram_fsm.access_count == 0);
         end
 
@@ -94,9 +94,8 @@ module dram_ctrl_top_tb;
             #5;
         end
 
-
         // waits for refresh
-        //@(dut.refresh_flag);
+        @(dut.refresh_flag);
 
         #100;
 
