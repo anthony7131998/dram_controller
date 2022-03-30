@@ -70,8 +70,11 @@ module dram_ctrl_top_tb;
         #10 rst_b <= 1'b1;
 
         #10 l2_rw_req <= 1'b1; // write to DRAM
-        #10 l2_req_instr <= $urandom;
-        
+        l2_req_instr[L2_REQ_WIDTH-8:L2_REQ_WIDTH-10] <= $urandom; //bankid
+        l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17] <= $urandom; //rowid
+        l2_req_instr[L2_REQ_WIDTH-1:L2_REQ_WIDTH-7] <= $urandom - l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17]; // offset
+        #10;
+
         // Send write instruction and data
         for(i=0; i<128; i=i+1) begin
             #5 l2_req_instr <= l2_req_instr + 1'b1;
