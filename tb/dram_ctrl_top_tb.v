@@ -78,7 +78,6 @@ module dram_ctrl_top_tb;
         for(i=0; i<128; i=i+1) begin
             #5 l2_req_instr <= l2_req_instr + 1'b1;
             #5 l2_req_data <= $urandom;
-            #5 data_reg <= $urandom;
         end
 
         for(i=0; i<128; i=i+1) begin
