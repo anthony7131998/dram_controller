@@ -81,17 +81,21 @@ module dram_ctrl_top_tb;
         // Send write instruction and data
         l2_cmd_valid = 1'b1;
 
+        $display("Filling up Instruction Buffers.....");
         // Fills up buffer
         for(i=0; i<128; i=i+1) begin
-            #10 l2_req_instr <= l2_req_instr + 1'b1;
+            // #10 l2_req_instr <= l2_req_instr + 1'b1;
+            #10 l2_req_instr[L2_REQ_WIDTH-8:L2_REQ_WIDTH-10] <= $urandom % 8; //bankid
+            #10 l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17] <= $urandom % 128; //rowid 124 -> 125 -> 126.. -> 0
+            #10 l2_req_instr[L2_REQ_WIDTH-1:L2_REQ_WIDTH-7] <= $urandom % (l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17]); // offset 4
         end
 
         // Completes all commands in buffer
-        for(i=0; i<128*8; i=i+1) begin
+        for(i=0; i<4*8; i=i+1) begin
             l2_req_data <= $urandom;
             @(dut.dram_fsm.access_count == 0);
+            
             // ToDo: Add a display where it indicates each WRITE to BFM.
-
         end
 
         //ToDo: Fix Reads. Want to REAd at least 10 write commands
@@ -101,13 +105,14 @@ module dram_ctrl_top_tb;
         
         l2_rw_req <= 1'b0; // read from DRAM
         #10 buff_rw <= 1'b1;
-        for(i=0; i<64; i=i+1) begin
-            #5 l2_req_instr <= l2_req_instr - 1'b1;
+        for(i=0; i<4*8; i=i+1) begin
+            #10 l2_req_instr[L2_REQ_WIDTH-8:L2_REQ_WIDTH-10] <= $urandom % 8; //bankid
+            #10 l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17] <= $urandom % 128; //rowid 124 -> 125 -> 126.. -> 0
+            #10 l2_req_instr[L2_REQ_WIDTH-1:L2_REQ_WIDTH-7] <= 0; // offset 4
+            // #5 l2_req_instr <= l2_req_instr - 1'b1;
             #40;
             // When access count = 0, display the data for a READ
         end
-
-        #10 l2_req_instr[L2_REQ_WIDTH-8:L2_REQ_WIDTH-10] <= '0;
     
         @(dut.refresh_flag);
 
@@ -135,11 +140,11 @@ module dram_ctrl_top_tb;
     //                 dut.address_translate.bank_id, dut.address_translate.row_id, dut.address_translate.col_id, dut.address_translate.offset);
     // end
 
-    initial begin : monitor_bfm
-        $timeformat(-3, 9, "ms");
-        $monitor("[$monitor] time=%0t bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, data= %0h", $time, l2_rw_req,
-                    bfm.bank_id, bfm.rowid, bfm.colid, l2_rw_req, bfm.data);
-    end
+    // initial begin : monitor_bfm
+    //     $timeformat(-3, 9, "ms");
+    //     $monitor("[$monitor] time=%0t bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, data= %0h", $time, l2_rw_req,
+    //                 bfm.bank_id, bfm.rowid, bfm.colid, l2_rw_req, bfm.data);
+    // end
 
     always @(cmd_req) begin : models_handshake
         if(cmd_req) begin
@@ -152,6 +157,14 @@ module dram_ctrl_top_tb;
     always @(dut.refresh_flag) begin : monitor_refresh_state
         $timeformat(-3, 9, "ms");
         if(dut.refresh_flag) $display("time=%0t REFRESH DRAM", $time);
+    end
+
+    always @(l2_rsp_data, l2_req_data) begin : monitor_data_trans
+        $timeformat(-3, 9, "ms");
+        if(l2_rw_req)
+            $display("time=%0t l2_req_data=%0h bank_id=%0h row_id=%0h col_id=%0h", $time, l2_req_data, bfm.bank_id, bfm.rowid, bfm.colid);
+        else
+            $display("time=%0t l2_rsp_data=%0h bank_id=%0h row_id=%0h col_id=%0h", $time, l2_rsp_data, bfm.bank_id, bfm.rowid, bfm.colid);
     end
 
 endmodule

@@ -28,7 +28,7 @@ module dram_ctrl #(
     output [NUM_OF_BANKS-1:0] bank_sel,
     output [NUM_OF_ROWS-1:0] row_sel,
     output [NUM_OF_COLS-1:0] col_sel,
-    output [DATA_WIDTH-1:0] l2_rsp_data
+    output reg [DATA_WIDTH-1:0] l2_rsp_data
     
 );
 
@@ -103,8 +103,14 @@ module dram_ctrl #(
     end
 
     assign dram_data = l2_rw_req ? tmp_dram_bit_data : 'bz;
-    assign l2_rsp_data = (rd_data_en && !l2_rw_req) ? sipo_data_out : 'bz;
 
+    always @(posedge clk or negedge rst_b) begin : regs_output
+        if(!rst_b) begin
+            l2_rsp_data <= '0;
+        end else begin
+            if(rd_data_en && !l2_rw_req) l2_rsp_data <= sipo_data_out;
+        end
+    end
 
     // Instantiations
     dram_buffer #(
@@ -193,7 +199,6 @@ module dram_ctrl #(
         .refresh_flag   (refresh_flag)
     );
 
-    //ToDo: Connect ack/req
     dram_ctrl_fsm #(
         .NUMBER_OF_BANKS    (8),
         .NUMBER_OF_ROWS     (128),
