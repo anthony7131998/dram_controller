@@ -32,7 +32,7 @@ module dram_ctrl #(
     
 );
 
-// Internal Signal Declarations and Assignments
+    // Internal Signal Declarations and Assignments
     wire nc_full_l2_buffer;
     wire nc_empty_l2_buffer;
     wire nc_empty_data_buffer;
@@ -77,11 +77,10 @@ module dram_ctrl #(
         address_trans_out = {row_offset, bank_id, row_id, col_id};
         address_buff_offset = address_trans_out[CONCAT_ADDRESS-1:CONCAT_ADDRESS-7];
         address_buff_bankid = address_trans_out[CONCAT_ADDRESS-8:CONCAT_ADDRESS-10];
-        address_buff_rowid = address_trans_out[CONCAT_ADDRESS-11:CONCAT_ADDRESS-17]; //this is input to incrementer
-        address_buff_colid = address_trans_out[CONCAT_ADDRESS-18:CONCAT_ADDRESS-20]; //this is input to incrementer
+        address_buff_rowid = address_trans_out[CONCAT_ADDRESS-11:CONCAT_ADDRESS-17];
+        address_buff_colid = address_trans_out[CONCAT_ADDRESS-18:CONCAT_ADDRESS-20];
     end
 
-    //ToDo:insert counter blocks here   
     always@(posedge clk or negedge rst_b)  begin : col_and_row_counters
         if (!rst_b) begin
             inc_col_id <= 0;
@@ -160,20 +159,6 @@ module dram_ctrl #(
         .data_in  (dram_data),
         .data_out (sipo_data_out)
 	);
-
-    dram_buffer #(
-        .WIDTH (8),
-        .DEPTH (NUM_OF_ROWS)
-    ) l2_rsp_buffer (
-        .datain     (sipo_data_out),
-        .clk        (clk),
-        .rd_en      (rd_data_en),
-        .wr_en      (rd_data_en),
-        .rst_b      (rst_b),
-        .dataout    (NC),
-        .full_flag  (nc_full_rsp_buffer),
-        .empty_flag (nc_empty_rsp_buffer)
-    );
 
     dram_decoder3x8 bank_decoder(
         .din    (address_buff_bankid),

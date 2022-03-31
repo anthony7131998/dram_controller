@@ -121,6 +121,9 @@ module dram_ctrl_top_tb;
         disable generate_clk;
     end
 
+
+    //====================================Monitors that helped during debug stages==========================================================
+
     // initial begin : monitor_buffers
     //     $timeformat(-3, 9, "ms");
     //     $monitor("[$monitor] time=%0t rd_en=%0h, wr_en=%0h, addr_buffer_in=%0h, addr_buffer_out=%0h", 
