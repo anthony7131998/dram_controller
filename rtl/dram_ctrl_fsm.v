@@ -94,6 +94,7 @@ module dram_ctrl_fsm #(
                     if (access_count == 0) begin
                         next_access_count = offset;
                         address_buff_en = 1'b1;
+                        row_en = 1;
                     end
                     cmd = 2'b00;
                     next_state = WAIT_ACK;
@@ -125,7 +126,6 @@ module dram_ctrl_fsm #(
                     if (access_count == 0) begin
                         next_access_count = offset;
                         address_buff_en = 1'b1;
-                        row_en = 1;
                     end else begin
                         cmd = 2'b11;
                         next_access_count = access_count - 1'b1;

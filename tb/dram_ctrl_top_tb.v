@@ -116,29 +116,28 @@ module dram_ctrl_top_tb;
         disable generate_clk;
     end
 
-    initial begin : monitor_buffers
-        $timeformat(-3, 9, "ms");
-        $monitor("[$monitor] time=%0t rd_en=%0h, wr_en=%0h, addr_buffer_in=%0h, addr_buffer_out=%0h", 
-                    $time, dut.l2_req_buffer.rd_en, l2_rw_req, dut.l2_req_instr, dut.l2_buffer_out);
-    end
+    // initial begin : monitor_buffers
+    //     $timeformat(-3, 9, "ms");
+    //     $monitor("[$monitor] time=%0t rd_en=%0h, wr_en=%0h, addr_buffer_in=%0h, addr_buffer_out=%0h", 
+    //                 $time, dut.l2_req_buffer.rd_en, l2_rw_req, dut.l2_req_instr, dut.l2_buffer_out);
+    // end
 
     // initial begin : monitor_FSM
     //     @(dut.dram_fsm.present_state)
     //     $monitor("[$monitor] time=%0t present_state=%0b next_state=%0b", $time, dut.dram_fsm.present_state, dut.dram_fsm.next_state);
     // end
 
-    initial begin : address_translator
-        $timeformat(-3, 9, "ms");
-        @(dut.address_translate.l2_req_address)
+    // initial begin : address_translator
+    //     $timeformat(-3, 9, "ms");
+    //     @(dut.address_translate.l2_req_address)
 
-            $monitor("[$monitor] time=%0t l2_req_address=%0h bankid=%0d rowid=%0d colid=%0d offset=%0d", $time, dut.address_translate.l2_req_address, 
-                    dut.address_translate.bank_id, dut.address_translate.row_id, dut.address_translate.col_id, dut.address_translate.offset);
-    end
+    //         $monitor("[$monitor] time=%0t l2_req_address=%0h bankid=%0d rowid=%0d colid=%0d offset=%0d", $time, dut.address_translate.l2_req_address, 
+    //                 dut.address_translate.bank_id, dut.address_translate.row_id, dut.address_translate.col_id, dut.address_translate.offset);
+    // end
 
     initial begin : monitor_bfm
         $timeformat(-3, 9, "ms");
-        @(bfm.data)
-            $monitor("[$monitor] time=%0t bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, data= %0h", $time, l2_rw_req,
+        $monitor("[$monitor] time=%0t bank_rw=%d bank_id=%d rowid=%d colid=%d buffer_rw=%0b, data= %0h", $time, l2_rw_req,
                     bfm.bank_id, bfm.rowid, bfm.colid, l2_rw_req, bfm.data);
     end
 
