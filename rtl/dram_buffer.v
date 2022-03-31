@@ -37,7 +37,7 @@ module dram_buffer #(
 				wr_addr <= wr_addr + 1;
 				count <= count + 1'b1;
 			end
-			else if (rd_en && !empty_flag) begin
+			if (rd_en && !empty_flag) begin
 				dataout <= buff[rd_addr];
 				rd_addr <= rd_addr + 1;
 				count <= count - 1'b1;

@@ -29,6 +29,7 @@ module dram_ctrl #(
     output [NUM_OF_ROWS-1:0] row_sel,
     output [NUM_OF_COLS-1:0] col_sel,
     output [DATA_WIDTH-1:0] l2_rsp_data
+    
 );
 
 // Internal Signal Declarations and Assignments
@@ -38,6 +39,7 @@ module dram_ctrl #(
     wire nc_full_data_buffer;
     wire nc_empty_rsp_buffer;
     wire nc_full_rsp_buffer;
+    wire [DATA_WIDTH-1:0] NC;
     wire [L2_REQ_WIDTH-1:0] l2_buffer_out;
     wire [$clog2(NUM_OF_BANKS)-1:0] bank_id;
     wire [$clog2(NUM_OF_ROWS)-1:0] row_id;
@@ -58,6 +60,7 @@ module dram_ctrl #(
     wire row_inc;
     wire col_inc;
     wire load_data;
+    wire rd_data_en;
 
     reg [CONCAT_ADDRESS-1:0] address_trans_out;
     reg [CONCAT_ADDRESS-1:0] address_buff_out;
@@ -100,6 +103,8 @@ module dram_ctrl #(
     end
 
     assign dram_data = l2_rw_req ? tmp_dram_bit_data : 'bz;
+    assign l2_rsp_data = (rd_data_en && !l2_rw_req) ? sipo_data_out : 'bz;
+
 
     // Instantiations
     dram_buffer #(
@@ -141,7 +146,8 @@ module dram_ctrl #(
     );
 
     dram_sipo #(
-	    .WIDTH (8)
+	    .WIDTH (8),
+        .BKWD (1)
     ) dram_sipo(
         .clk      (clk), 
         .rst_b    (rst_b),
@@ -155,10 +161,10 @@ module dram_ctrl #(
     ) l2_rsp_buffer (
         .datain     (sipo_data_out),
         .clk        (clk),
-        .rd_en      (1'b1),
-        .wr_en      (1'b1),
+        .rd_en      (rd_data_en),
+        .wr_en      (rd_data_en),
         .rst_b      (rst_b),
-        .dataout    (l2_rsp_data),
+        .dataout    (NC),
         .full_flag  (nc_full_rsp_buffer),
         .empty_flag (nc_empty_rsp_buffer)
     );
@@ -211,7 +217,8 @@ module dram_ctrl #(
         .col_en             (col_en),
         .bank_en            (bank_en),
         .address_buff_en    (addr_buff_en),
-        .cmd_ack            (cmd_ack)
+        .cmd_ack            (cmd_ack),
+        .read_data_en        (rd_data_en)
     );
 
 endmodule

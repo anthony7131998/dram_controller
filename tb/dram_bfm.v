@@ -10,6 +10,7 @@ module dram_bfm #(
     input clk,
     input rst_b,
     input rw,
+    input buff_rw,
     input [$clog2(NUM_OF_BANKS)-1:0] bank_id,
     input [$clog2(NUM_OF_ROWS)-1:0] rowid,
     input [$clog2(NUM_OF_COLS)-1:0] colid,
@@ -76,8 +77,10 @@ module dram_bfm #(
                     3'b110: bank6[rowid][colid] <= data;
                     3'b111: bank7[rowid][colid] <= data;
                 endcase
+            end
+            if(rw || buff_rw) begin
 
-                for(i=0; i<NUM_OF_COLS ; i=i+1) begin
+                 for(i=0; i<NUM_OF_COLS ; i=i+1) begin
                     buffer_tmp0[i] <= bank0[rowid][i];
                     buffer_tmp1[i] <= bank1[rowid][i];
                     buffer_tmp2[i] <= bank2[rowid][i];
@@ -86,8 +89,7 @@ module dram_bfm #(
                     buffer_tmp5[i] <= bank5[rowid][i];
                     buffer_tmp6[i] <= bank6[rowid][i];
                     buffer_tmp7[i] <= bank7[rowid][i];
-                end
-
+                 end
                 case(bank_id)
                         3'b000: buffers[0] <= buffer_tmp0;
                         3'b001: buffers[1] <= buffer_tmp1;
@@ -97,8 +99,8 @@ module dram_bfm #(
                         3'b101: buffers[5] <= buffer_tmp5;
                         3'b110: buffers[6] <= buffer_tmp6;
                         3'b111: buffers[7] <= buffer_tmp7;
-                endcase            
-            end
+                endcase         
+            end   
         end
     end
 

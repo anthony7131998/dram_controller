@@ -32,6 +32,8 @@ module dram_ctrl_top_tb;
     reg bank_rw;
     reg buf_rw;
     reg rw;
+    reg read_data_en;
+    reg buff_rw;
 
     always@(*) rw = (buf_rw || buf_rw) && l2_rw_req;
 
@@ -53,6 +55,7 @@ module dram_ctrl_top_tb;
         .clk        (clk),
         .rst_b      (rst_b),
         .rw         (l2_rw_req),
+        .buff_rw    (buff_rw),
         .bank_id    (dut.bank_id), //the sels will be encoded back to bank ids for the sake of dram bfm
         .rowid      (dut.inc_row_id),
         .colid      (dut.inc_col_id),
@@ -69,6 +72,7 @@ module dram_ctrl_top_tb;
         #10 rst_b <= 1'b0;
         #10 rst_b <= 1'b1;
 
+        #10 buff_rw <= 0'b1;
         #10 l2_rw_req <= 1'b1; // write to DRAM
         #10 l2_req_instr[L2_REQ_WIDTH-8:L2_REQ_WIDTH-10] <= $urandom % 8; //bankid
         #10 l2_req_instr[L2_REQ_WIDTH-11:L2_REQ_WIDTH-17] <= $urandom % 128; //rowid 124 -> 125 -> 126.. -> 0
@@ -95,14 +99,16 @@ module dram_ctrl_top_tb;
         // 2) Trace back from l2_rsp_data to dram_bfm or dram_bfm to l2_rsp_data
         // 3) Add any logic to meet these basic specs, and ensure the writes and read coherence property matches
         
-        #10 l2_rw_req <= 1'b0; // read from DRAM
-        for(i=0; i<128*8; i=i+1) begin
+        l2_rw_req <= 1'b0; // read from DRAM
+        #10 buff_rw <= 1'b1;
+        for(i=0; i<64; i=i+1) begin
             #5 l2_req_instr <= l2_req_instr - 1'b1;
-            #5;
+            #40;
             // When access count = 0, display the data for a READ
         end
 
-        // waits for refresh
+        #10 l2_req_instr[L2_REQ_WIDTH-8:L2_REQ_WIDTH-10] <= '0;
+    
         @(dut.refresh_flag);
 
         #100;

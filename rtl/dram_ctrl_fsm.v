@@ -24,7 +24,8 @@ module dram_ctrl_fsm #(
     output reg col_en,
     output reg load_data,
     output reg bank_en,
-    output reg address_buff_en
+    output reg address_buff_en,
+    output reg read_data_en
 );
 
     // State Declarations
@@ -40,12 +41,14 @@ module dram_ctrl_fsm #(
     reg [$clog2(NUMBER_OF_ROWS)-1:0]  prev_row_id;
     reg [3:0] col_counter, next_col_counter;
     reg [9:0] access_count, next_access_count;
+    reg [1:0] read_count, next_read_count;
 
     always @(posedge clk, posedge rst_b) 
     begin 
         if (!rst_b) begin
             present_state <= IDLE_STATE;
             col_counter <= '0;
+            read_count <= 2'b10;
             access_count <= offset;
         end
         else begin
@@ -54,6 +57,7 @@ module dram_ctrl_fsm #(
             prev_row_id <= row_id;
             col_counter <= next_col_counter;
             access_count <= next_access_count;
+            read_count <= next_read_count;
         end
     end
 
@@ -94,6 +98,7 @@ module dram_ctrl_fsm #(
                     cmd = 2'b00;
                     next_state = WAIT_ACK;
                 end
+                read_data_en = '0;
             end
 
             COL_STATE: begin
@@ -126,7 +131,9 @@ module dram_ctrl_fsm #(
                         next_access_count = access_count - 1'b1;
                         next_state = WAIT_ACK;
                     end
+                    read_data_en = '1;
                 end
+
             end
 
             WAIT_ACK: begin
@@ -139,6 +146,7 @@ module dram_ctrl_fsm #(
                         PRECHARGE_STATE: next_state = BNR_STATE;
                     endcase
                 end
+                read_data_en = '0;
             end
 
             REFRESH_STATE: begin
