@@ -9,12 +9,12 @@ module counter #(
 );
 
 	reg [width-1:0] count;
-				   
+
     always @ (posedge clk or negedge rst_b) begin
         if (!rst_b) begin
             count <= '0;
             refresh_flag <= 1'b0;
-            
+
         end else begin
             if (en) begin
                 count <= count+1;

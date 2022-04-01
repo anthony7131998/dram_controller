@@ -4,19 +4,19 @@ vlib work
 
 vmap work
 
-vcom ../rtl/counter.v
-vcom ../rtl/dram_addr_translator.v
-vcom ../rtl/dram_buffer.v
-vcom ../rtl/dram_decoder3x8.v
-vcom ../rtl/dram_piso.v
-vcom ../rtl/dram_row_decoder.v
-vcom ../rtl/dram_sipo.v
-vcom ../rtl/dram_ctrl_fsm.v
-vcom ../rtl/dram_ctrl.v
-vcom ../verif/dram_bfm.v
-vcom ../verif/dram_ctrl_top_tb.v
+vlog -f "../rtl/counter.v"
+vlog -f "../rtl/dram_addr_translator.v"
+vlog ../rtl/dram_buffer.v
+vlog ../rtl/dram_decoder3x8.v
+vlog ../rtl/dram_piso.v
+vlog ../rtl/dram_row_decoder.v
+vlog ../rtl/dram_sipo.v
+vlog ../rtl/dram_ctrl_fsm.v
+vlog ../rtl/dram_ctrl.v
+vlog ../verif/dram_bfm.v
+vlog ../verif/dram_ctrl_top_tb.v
 
-vsim dram_ctrl_top_tb.v
+vsim dram_ctrl_top_tb
 
 onerror {resume}
 quietly WaveActivateNextPane {} 0
