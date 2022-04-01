@@ -1,6 +1,7 @@
 m255
 K4
 z2
+!s11f vlog 2020.3 2020.07, Jul 22 2020
 13
 !s112 1.1
 !i10d 8192
@@ -8,3 +9,245 @@ z2
 !i10f 100
 cModel Technology
 dC:/Users/antho/Documents/MSEE/Advanced VLSI/Hw/Hw2/scripts
+vcounter
+Z0 !s110 1648777858
+!i10b 1
+!s100 KW62j>?ORmQQWgmO1T?Em0
+Z1 !s11b Dg1SIo80bB@j0V0VzS_@n1
+Id<zM2fX8;bO1cQ892igEK0
+Z2 dC:/Users/17862/Desktop/Spring 2022/VLSI_2/HW2/dram_controller/scripts
+w1648777576
+8../rtl/counter.v
+F../rtl/counter.v
+!i122 45
+L0 3 28
+Z3 VDg1SIo80bB@j0V0VzS_@n1
+Z4 OV;L;2020.3;71
+r1
+!s85 0
+31
+Z5 !s108 1648777858.000000
+!s107 ../rtl/counter.v|
+!s90 -reportprogress|300|../rtl/counter.v|
+!i113 1
+Z6 tCvgOpt 0
+vdram_addr_translator
+R0
+!i10b 1
+!s100 LcL=Q_RDH6mI[>`ZFo]?53
+R1
+I7EQS5YE0M1eeSIW:?5;6]2
+R2
+Z7 w1648681689
+8../rtl/dram_addr_translator.v
+F../rtl/dram_addr_translator.v
+!i122 46
+L0 6 30
+R3
+R4
+r1
+!s85 0
+31
+R5
+!s107 ../rtl/dram_addr_translator.v|
+!s90 -reportprogress|300|../rtl/dram_addr_translator.v|
+!i113 1
+R6
+vdram_bfm
+Z8 !s110 1648777859
+!i10b 1
+!s100 <Tkacn6aikaQCfOf]SWS31
+R1
+I6UJ5ZGn5=zYbbI9l1zmWn2
+R2
+w1648706167
+8../tb/dram_bfm.v
+F../tb/dram_bfm.v
+!i122 54
+L0 4 125
+R3
+R4
+r1
+!s85 0
+31
+Z9 !s108 1648777859.000000
+!s107 ../tb/dram_bfm.v|
+!s90 -reportprogress|300|../tb/dram_bfm.v|
+!i113 1
+R6
+vdram_buffer
+R0
+!i10b 1
+!s100 :ZLaREV5db=id<Jbk<U`G3
+R1
+I3Z8LomA8_^B]Xb^8jQaBL0
+R2
+Z10 w1648769355
+8../rtl/dram_buffer.v
+F../rtl/dram_buffer.v
+!i122 47
+L0 1 54
+R3
+R4
+r1
+!s85 0
+31
+R5
+!s107 ../rtl/dram_buffer.v|
+!s90 -reportprogress|300|../rtl/dram_buffer.v|
+!i113 1
+R6
+vdram_ctrl
+R8
+!i10b 1
+!s100 1=JzTK1hojO4@[ecZ@j7<3
+R1
+I5cGOcYnOn7@nP]9QE3QYC1
+R2
+R10
+8../rtl/dram_ctrl.v
+F../rtl/dram_ctrl.v
+!i122 53
+L0 8 207
+R3
+R4
+r1
+!s85 0
+31
+R9
+!s107 ../rtl/dram_ctrl.v|
+!s90 -reportprogress|300|../rtl/dram_ctrl.v|
+!i113 1
+R6
+vdram_ctrl_fsm
+R8
+!i10b 1
+!s100 L=HVj:>0g@8jb<9AQg7;j2
+R1
+I=imG5_`i0knI5R[nI6<Qa3
+R2
+R10
+8../rtl/dram_ctrl_fsm.v
+F../rtl/dram_ctrl_fsm.v
+!i122 52
+L0 3 187
+R3
+R4
+r1
+!s85 0
+31
+R9
+!s107 ../rtl/dram_ctrl_fsm.v|
+!s90 -reportprogress|300|../rtl/dram_ctrl_fsm.v|
+!i113 1
+R6
+vdram_ctrl_top_tb
+R8
+!i10b 1
+!s100 Z2[b:G^ARBRCIdUDeBBoT1
+R1
+I]9XPmLX>e2RGMJ843UfHg3
+R2
+R10
+8../tb/dram_ctrl_top_tb.v
+F../tb/dram_ctrl_top_tb.v
+!i122 55
+L0 3 171
+R3
+R4
+r1
+!s85 0
+31
+R9
+!s107 ../tb/dram_ctrl_top_tb.v|
+!s90 -reportprogress|300|../tb/dram_ctrl_top_tb.v|
+!i113 1
+R6
+vdram_decoder3x8
+R0
+!i10b 1
+!s100 affk[M70`Sf@c_hFCoQXd3
+R1
+I2Zh0;WW?CC^fDzGJ:A2Rd1
+R2
+R7
+8../rtl/dram_decoder3x8.v
+F../rtl/dram_decoder3x8.v
+!i122 48
+L0 4 20
+R3
+R4
+r1
+!s85 0
+31
+R5
+!s107 ../rtl/dram_decoder3x8.v|
+!s90 -reportprogress|300|../rtl/dram_decoder3x8.v|
+!i113 1
+R6
+vdram_piso
+R0
+!i10b 1
+!s100 Ca:l0TT?BPlA;:LlEIoX82
+R1
+In45HMEBE:g?J6JjDX?NSl0
+R2
+R7
+8../rtl/dram_piso.v
+F../rtl/dram_piso.v
+!i122 49
+L0 1 32
+R3
+R4
+r1
+!s85 0
+31
+R5
+!s107 ../rtl/dram_piso.v|
+!s90 -reportprogress|300|../rtl/dram_piso.v|
+!i113 1
+R6
+vdram_row_decoder
+R0
+!i10b 1
+!s100 8heZln0`1_5:49DSKA?;X3
+R1
+In0:[g`^eFT85CA]1_P`^Z0
+R2
+R7
+8../rtl/dram_row_decoder.v
+F../rtl/dram_row_decoder.v
+!i122 50
+L0 3 13
+R3
+R4
+r1
+!s85 0
+31
+R5
+!s107 ../rtl/dram_row_decoder.v|
+!s90 -reportprogress|300|../rtl/dram_row_decoder.v|
+!i113 1
+R6
+vdram_sipo
+R8
+!i10b 1
+!s100 Q^A2Hl8hPZ[dbDdVCA81E2
+R1
+I1jQN2bgBIaVdkh@VK1_k`1
+R2
+w1648698562
+8../rtl/dram_sipo.v
+F../rtl/dram_sipo.v
+!i122 51
+L0 1 35
+R3
+R4
+r1
+!s85 0
+31
+R9
+!s107 ../rtl/dram_sipo.v|
+!s90 -reportprogress|300|../rtl/dram_sipo.v|
+!i113 1
+R6
